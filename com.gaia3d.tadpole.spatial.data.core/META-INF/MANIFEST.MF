@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spatial data core
+Bundle-SymbolicName: com.gaia3d.tadpole.spatial.data.core;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.gaia3d.tadpole.spatial.data.core.Activator
+Bundle-Vendor: gaia3d
+Require-Bundle: org.eclipse.rap.ui;bundle-version="2.3.1",
+ org.eclipse.core.runtime,
+ com.hangum.tadpole.rdb.core;bundle-version="2.0.0",
+ com.hangum.tadpole.commons.libs;bundle-version="2.0.0",
+ com.hangum.tadpole.engine;bundle-version="1.0.0",
+ org.apache.commons.io;bundle-version="2.2.0",
+ com.hangum.tadpole.commons.utils;bundle-version="2.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy

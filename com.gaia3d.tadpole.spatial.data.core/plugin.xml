@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.hangum.tadpole.rdb.core.extensionpoint.definition.main.editor">
+      <mainEditor
+            class="com.gaia3d.tadpole.spatial.data.core.spatical.editor.SpatialDataManagerMainEditor">
+      </mainEditor>
+   </extension>
+   <extension
+         point="com.hangum.tadpole.rdb.core.extensionpoint.definition.connection.decoration">
+      <client
+            class="com.gaia3d.tadpole.spatial.data.core.spatical.connection.ConnectionViewerDecorator">
+      </client>
+   </extension>
+   <extension
+         point="com.hangum.tadpole.rdb.core.extensionpoint.definition.table.decoration">
+      <tableDecoration
+            class="com.gaia3d.tadpole.spatial.data.core.spatical.table.ObjectViewerTableDecorator">
+      </tableDecoration>
+   </extension>
+
+</plugin>
