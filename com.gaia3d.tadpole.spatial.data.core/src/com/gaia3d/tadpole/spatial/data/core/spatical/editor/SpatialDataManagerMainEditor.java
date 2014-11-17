@@ -163,7 +163,7 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 			listGJson.add((String)mapColumns.get(index));
 		}
 		
-		drawingUserColorMap(listGJson, "#ff7800");
+		drawingUserColorMap(listGJson);
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 			
 			// ---------------------------------------------
 			clearMap();
-			drawMap(listGisColumnGjson);
+			drawMap(listGisColumnGjson, "#ff7800");
 		}
 	}
 	
@@ -203,26 +203,29 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 	
 	/**
 	 * 지도에 데이터를 표시합니다.
+	 * 
 	 * @param strGeoJson
 	 */
-	private void drawingUserColorMap(List<String> listGJson, String strColor) {
+	private void drawingUserColorMap(List<String> listGJson) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
 //		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		browserMap.evaluate(String.format("drawingUserColorMap('%s', '%s');", strFullyGeojson, strColor));
+		browserMap.evaluate(String.format("doubleClickPoint('%s');", strFullyGeojson));
 	}
 
 	/**
 	 * 지도에 데이터를 표시합니다.
+	 * 
 	 * @param strGeoJson
+	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색 
 	 */
-	private void drawMap(List<String> listGJson) {
+	private void drawMap(List<String> listGJson, String strColor) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
 //		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		browserMap.evaluate(String.format("drawingMap('%s');", strFullyGeojson));
+		browserMap.evaluate(String.format("drawingMap('%s', '%s');", strFullyGeojson, strColor));
 	}
 	
 	/**
-	 * leftlet에서 지도에 표시할 수 있도록 데이터를 만듭니
+	 * leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니
 	 * 
 	 * @param listPostGisJson
 	 * @return

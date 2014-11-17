@@ -45,14 +45,15 @@
 
 		/** define layer */
 		var layerTapole = L.geoJson();
+		var layerTapoleClick = L.geoJson();
 	
 		/*
 		* clear map
 		*/
 		clearLayersMap = function() {
 			try {
-				
 				layerTapole.clearLayers();
+				layerTapoleClick.clearLayers();
 			} catch(err) {
 				console.log(err);
 			}
@@ -60,33 +61,40 @@
 		
 		/**
 		* drawing map
+		*
+		* @param geoJSON initial map data
+		* @param cole initialize user click color
 		*/
-		drawingMap = function(geoJSON) {
+		drawingMap = function(geoJSON, color) {
 			try {
-				/* console.log("==> geojsonFeature: \n" + geoJSON ); */
+				/* console.log("==> color : " + color);
+				console.log("==> geojsonFeature: \n" + geoJSON ); */
 				
 				/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 				layerTapole = L.geoJson(jQuery.parseJSON(geoJSON)).addTo(map);
+				
+				var myStyle = {
+					    "color": color,
+					    "weight": 5,
+					    "opacity": 0.65
+					};
+				var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
+				layerTapoleClick = L.geoJson(geojsonFeature,{
+					style: myStyle
+				}).addTo(map);
 			} catch(err) {
 				console.log(err);
 			}
 		};
 		
 		/**
-		* drawing map
+		* doublc click 
 		*/
-		drawingUserColorMap = function(geoJSON, color) {
+		doubleClickPoint = function(geoJSON) {
 			try {
 				/* console.log("==> geojsonFeature: \n" + geoJSON ); */
-				var myStyle = {
-				    "color": color,
-				    "weight": 5,
-				    "opacity": 0.65
-				};
 				
-				
-				/* layerTapole.resetStyle(myStyle); */
-				layerTapole.addData(jQuery.parseJSON(geoJSON));
+				layerTapoleClick.addData(jQuery.parseJSON(geoJSON));
 			} catch(err) {
 				console.log(err);
 			}
