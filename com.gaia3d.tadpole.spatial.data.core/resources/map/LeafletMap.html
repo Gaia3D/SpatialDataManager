@@ -25,7 +25,7 @@
 	<script type="text/javascript">
 		
 		/* 지도의 center를 맞춘다 */
-		var map = L.map('map').setView([37.55, 127.07], 8);
+		var map = L.map('map').setView([37.55, 127.07], 1);
 		
 		/* 지도의 title을 표현한다 */
 		L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
@@ -44,16 +44,16 @@
 		//-------- sample data -----------------------------------------
 
 		/** define layer */
-		var layerTapole = L.geoJson();
-		var layerTapoleClick = L.geoJson();
+		var layerTadpole = L.geoJson();
+		var layerTadpoleClick = L.geoJson();
 	
 		/*
 		* clear map
 		*/
 		clearLayersMap = function() {
 			try {
-				layerTapole.clearLayers();
-				layerTapoleClick.clearLayers();
+				layerTadpole.clearLayers();
+				layerTadpoleClick.clearLayers();
 			} catch(err) {
 				console.log(err);
 			}
@@ -65,21 +65,25 @@
 		* @param geoJSON initial map data
 		* @param cole initialize user click color
 		*/
-		drawingMap = function(geoJSON, color) {
+		drawingMap = function(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
 			try {
 				/* console.log("==> color : " + color);
-				console.log("==> geojsonFeature: \n" + geoJSON ); */
+				console.log("==> geojsonFeature: \n" + txtGeoJSON ); */
 				
 				/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
-				layerTapole = L.geoJson(jQuery.parseJSON(geoJSON)).addTo(map);
+				var geoJSON = jQuery.parseJSON(txtGeoJSON);
+				layerTadpole = L.geoJson(geoJSON).addTo(map);
+				
+				/* first data set center */
+				map.setView([strCenterX, strCenterY], strZoom);
 				
 				var myStyle = {
-					    "color": color,
+					    "color": txtColor,
 					    "weight": 5,
 					    "opacity": 0.65
 					};
 				var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
-				layerTapoleClick = L.geoJson(geojsonFeature,{
+				layerTadpoleClick = L.geoJson(geojsonFeature,{
 					style: myStyle
 				}).addTo(map);
 			} catch(err) {
@@ -93,8 +97,7 @@
 		doubleClickPoint = function(geoJSON) {
 			try {
 				/* console.log("==> geojsonFeature: \n" + geoJSON ); */
-				
-				layerTapoleClick.addData(jQuery.parseJSON(geoJSON));
+				layerTadpoleClick.addData(jQuery.parseJSON(geoJSON));
 			} catch(err) {
 				console.log(err);
 			}

@@ -15,3 +15,8 @@ Require-Bundle: org.eclipse.rap.ui;bundle-version="2.3.1",
  com.hangum.tadpole.ace.editor.core;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: libs/geojson/geojson-jackson-1.2.jar,
+ libs/geojson/jackson-core-2.2.2.jar,
+ libs/geojson/jackson-databind-2.2.2.jar,
+ libs/geojson/jackson-annotations-2.2.2.jar,
+ .

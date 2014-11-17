@@ -19,9 +19,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.geojson.GeoJsonObject;
+import org.geojson.Geometry;
 import org.osgi.framework.Bundle;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gaia3d.tadpole.spatial.data.core.Activator;
+import com.gaia3d.tadpole.spatial.data.core.spatical.editor.inner.CenterObj;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
@@ -180,6 +184,9 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 			}
 		}
 		
+		/** 지도를 초기화 합니다 */
+		clearMap();
+		
 		//
 		if(!listGisColumnIndex.isEmpty()) {
 			List<String> listGisColumnGjson = new ArrayList<>();
@@ -192,7 +199,6 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 			}
 			
 			// ---------------------------------------------
-			clearMap();
 			drawMap(listGisColumnGjson, "#ff7800");
 		}
 	}
@@ -216,12 +222,46 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 	 * 지도에 데이터를 표시합니다.
 	 * 
 	 * @param strGeoJson
-	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색 
+	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
 	 */
 	private void drawMap(List<String> listGJson, String strColor) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
 //		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		browserMap.evaluate(String.format("drawingMap('%s', '%s');", strFullyGeojson, strColor));
+		
+		CenterObj getCenter = getCenter(listGJson.get(0));
+		browserMap.evaluate(String.format("drawingMap('%s', '%s', '%s', '%s', '%s' );", 
+					strFullyGeojson, 
+					strColor, 
+					getCenter.getCenterX(), getCenter.getCenterY(), getCenter.getZoom())
+				);
+	}
+	
+	/**
+	 * 검색된 첫번째 데이터를 지도 중앙에 표시합니다.
+	 */
+	private CenterObj getCenter(String str) {
+		if(null == str || "".equals(str)) return new CenterObj();
+
+		try {
+			GeoJsonObject object = new ObjectMapper().readValue(str, GeoJsonObject.class);
+			if (object instanceof Geometry) {
+				Geometry geometry = (Geometry)object;
+				if(logger.isDebugEnabled()) logger.debug("====================== Setting center ");
+				if(geometry.getCoordinates().size() >= 2) {
+					List listCoordinates = geometry.getCoordinates();
+					logger.debug("============> " + listCoordinates.get(0) +":" + listCoordinates.get(1));
+					
+					if(logger.isDebugEnabled()) logger.debug("center : X is  " + geometry.getCoordinates().get(0) + "\t:Y is " + geometry.getCoordinates().get(1));
+					
+					return new CenterObj(""+geometry.getCoordinates().get(0), ""+geometry.getCoordinates().get(1), "3");
+				}
+			}
+			
+		} catch (Exception e) {
+			logger.error("getJson parser exception", e);
+		}
+		
+		return new CenterObj();
 	}
 	
 	/**
