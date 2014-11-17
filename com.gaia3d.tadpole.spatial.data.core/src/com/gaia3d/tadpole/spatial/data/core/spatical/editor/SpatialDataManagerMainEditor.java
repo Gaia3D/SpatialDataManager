@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.osgi.framework.Bundle;
 
 import com.gaia3d.tadpole.spatial.data.core.Activator;
+import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
@@ -174,7 +175,7 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 		for(int i=0; i<mapColumnNames.size(); i++) {
 			String strSearchColumn = mapColumnNames.get(i);
 			
-			if(StringUtils.startsWithIgnoreCase(strSearchColumn, "TADPOLE_HIDE_")) {
+			if(StringUtils.startsWithIgnoreCase(strSearchColumn, PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN)) {
 				listGisColumnIndex.add(i);
 			}
 		}
@@ -275,7 +276,7 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 				
 				if(!addCostumeColumn.isEmpty()) {
 					String strReturnSQLFormat = "SELECT *, %s FROM (%s) as TADPOLESUB";
-					String strColumnCostumeFormat = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as TADPOLE_HIDE_%s";
+					String strColumnCostumeFormat = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 					
 					String strAddCustomeColumn = "";
 					for(int i=0; i<addCostumeColumn.size(); i++) {
