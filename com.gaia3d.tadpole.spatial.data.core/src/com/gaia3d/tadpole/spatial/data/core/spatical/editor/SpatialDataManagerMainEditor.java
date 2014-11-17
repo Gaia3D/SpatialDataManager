@@ -43,18 +43,40 @@ import com.hangum.tadpole.sql.util.resultset.ResultSetUtils;
  */
 public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
-	private static final String TMPELATE_GROUP_GET_JSON = "{\"type\": \"FeatureCollection\",\"features\":[ %s ]}";
-	private static final String TMPELATE_GET_JSON = "{ \"type\": \"Feature\", \"geometry\": %s }";
+	
+	/**
+	 * 사용자 쿼리에 geometry 컬럼이 있을 경우에 사용하기 위한 전체 쿼리
+	 */
+	private static final String GEOJSON_FULLY_SQL_FORMAT = "SELECT *, %s FROM (%s) as TADPOLESUB";
+	/**
+	 * 컬럼을 st_AsGeoJson 으로 변환합니다.
+	 * 참조: http://postgis.net/docs/ST_Transform.html
+	 */
+	private static final String GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	
+	/** 
+	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
+	 */
+	private static final String TMPELATE_GROUP_GEO_JSON = "{\"type\": \"FeatureCollection\",\"features\":[ %s ]}";
+	
+	/**
+	 * postgis의 쿼리 결과 leaflet에 주기위해 부분 GEOJSON
+	 */
+	private static final String TMPELATE_GEO_JSON = "{ \"type\": \"Feature\", \"geometry\": %s }";
+	
+	/** 사용자 지정 컬러 */
+	private static final String USER_CLICK_COLOR = "#ff7800";
 	
 	/** 지도가 들어갈 브라우저 */
 	private Browser browserMap;
 	
 	/** 결과 중에 geojson column index */
-	List<Integer> listGisColumnIndex = new ArrayList<>();
+	private List<Integer> listGisColumnIndex = new ArrayList<>();
 	
 	/** 
 	 * <pre>
-	 * 	지도 데이터 
+	 * 	geometry 테이블과 컬럼 정보를 가지고있습니다.
+	 * 
 	 * 	테이블명, 컬럼명
 	 * </pre> 
 	 */
@@ -199,7 +221,7 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 			}
 			
 			// ---------------------------------------------
-			drawMap(listGisColumnGjson, "#ff7800");
+			drawMap(listGisColumnGjson, USER_CLICK_COLOR);
 		}
 	}
 	
@@ -276,11 +298,11 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 		for(int i=0; i<listPostGisJson.size(); i++) {
 			String geoJson = listPostGisJson.get(i);
 			
-			tmpSBGeoJson.append(String.format(TMPELATE_GET_JSON, geoJson));
+			tmpSBGeoJson.append(String.format(TMPELATE_GEO_JSON, geoJson));
 			if(i != (listPostGisJson.size()-1)) tmpSBGeoJson.append(", ");
 		}
 		
-		return String.format(TMPELATE_GROUP_GET_JSON, tmpSBGeoJson.toString());
+		return String.format(TMPELATE_GROUP_GEO_JSON, tmpSBGeoJson.toString());
 	}
 
 	/**
@@ -318,24 +340,22 @@ public class SpatialDataManagerMainEditor extends AMainEditorExtension {
 				}	// end while
 				
 				if(!addCostumeColumn.isEmpty()) {
-					String strReturnSQLFormat = "SELECT *, %s FROM (%s) as TADPOLESUB";
-					String strColumnCostumeFormat = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 					
 					String strAddCustomeColumn = "";
 					for(int i=0; i<addCostumeColumn.size(); i++) {
 						String strColumn = addCostumeColumn.get(i);
 						
-						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(strColumnCostumeFormat, strColumn, strColumn);
-						else strAddCustomeColumn += String.format(strColumnCostumeFormat, strColumn, strColumn) + ", ";
+						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn);
+						else strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
 						
 					}
 					
 					if(logger.isDebugEnabled()) {
 						logger.debug("Add Column is " + strAddCustomeColumn);
-						logger.debug("full SQL is " + String.format(strReturnSQLFormat, strAddCustomeColumn, strSQL));
+						logger.debug("full SQL is " + String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL));
 					}
 					
-					return String.format(strReturnSQLFormat, strAddCustomeColumn, strSQL);
+					return String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL);
 				}
 			
 		} catch (Exception e1) {
