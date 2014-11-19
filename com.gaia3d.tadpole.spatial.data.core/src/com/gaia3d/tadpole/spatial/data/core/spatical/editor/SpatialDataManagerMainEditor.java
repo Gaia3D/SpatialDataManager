@@ -120,7 +120,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private void drawingUserColorMap(List<String> listGJson) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
 //		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		browserMap.evaluate(String.format("doubleClickPoint('%s');", strFullyGeojson));
+		browserMap.evaluate(String.format("onClickPoint('%s');", strFullyGeojson));
 	}
 
 	/**

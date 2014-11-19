@@ -13,106 +13,12 @@
 	<meta charset="UTF-8">
 	<title>Leaflet map</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/leaflet.css" />
-	<script src="js/leaflet-0.7.3.js"></script>
+	<link rel="stylesheet" href="js/leaflet.css" charset="utf-8" />
+	<script src="js/leaflet-0.7.3.js"  charset="utf-8"></script>
 	<script src="js/jquery-2.1.1.min.js"></script>
+	<script src="js/tadpoleSdm.js" charset="utf-8"></script>
 </head>
 <body>
  	<div id="map" style="width:100%; height:100%; position:fixed; left:0; top:0; overflow:hidden;"></div>
-
-	<script type="text/javascript">
-		
-		/* 지도의 center를 맞춘다 */
-		var map = L.map('map').setView([37.55, 127.07], 1);
-		
-		/* 지도의 title을 표현한다 */
-		L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-			maxZoom: 18,
-			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-			id: 'examples.map-20v6611k'
-		}).addTo(map);
-		
-		//-------- sample data -----------------------------------------
-	/* 
-		var geojsonFeature = { "type": "Feature",   "geometry": {"type":"Point","coordinates":[126.977379,37.557121]} } ;
-		L.geoJson(geojsonFeature).addTo(map); 
-	*/
-		//-------- sample data -----------------------------------------
-
-		/** define layer */
-		var layerTadpole = L.geoJson();
-		var layerTadpoleClick = L.geoJson();
-	
-		/*
-		* clear map
-		*/
-		clearAllLayersMap = function() {
-			try {
-				layerTadpole.clearLayers();
-				layerTadpoleClick.clearLayers();
-			} catch(err) {
-				console.log("Rise exception(clearAllLayersMap function) : " + err);
-			}
-		};
-		
-		/*
-		* clear map
-		*/
-		clearClickedLayersMap = function() {
-			try {
-				layerTadpoleClick.clearLayers();
-			} catch(err) {
-				console.log("Rise exception(cleareClickedLayersMap function) : " + err);
-			}
-		};
-		
-		
-		/**
-		* drawing map
-		*
-		* @param geoJSON initial map data
-		* @param cole initialize user click color
-		*/
-		drawingMap = function(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
-			try {
-				/* console.log("==> color : " + color);
-				console.log("==> geojsonFeature: \n" + txtGeoJSON ); */
-				
-				/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
-				var geoJSON = jQuery.parseJSON(txtGeoJSON);
-				layerTadpole = L.geoJson(geoJSON).addTo(map);
-				
-				/* first data set center */
-				map.setView([strCenterX, strCenterY], strZoom);
-				
-				var myStyle = {
-					    "color": txtColor,
-					    "weight": 5,
-					    "opacity": 0.65
-					};
-				var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
-				layerTadpoleClick = L.geoJson(geojsonFeature,{
-					style: myStyle
-				}).addTo(map);
-			} catch(err) {
-				console.log(err);
-			}
-		};
-		
-		/**
-		* doublc click 
-		*/
-		doubleClickPoint = function(geoJSON) {
-			try {
-				/* console.log("==> geojsonFeature: \n" + geoJSON ); */
-				layerTadpoleClick.addData(jQuery.parseJSON(geoJSON));
-			} catch(err) {
-				console.log(err);
-			}
-		};
-	</script>
-	
 </body>
 </html>
