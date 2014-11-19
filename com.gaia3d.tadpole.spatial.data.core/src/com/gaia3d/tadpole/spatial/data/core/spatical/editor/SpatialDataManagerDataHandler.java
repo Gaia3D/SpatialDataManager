@@ -149,12 +149,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	public void initUI() {
 		
 		try {
-			Bundle bundle = Activator.getDefault().getBundle();
-			URL resource = bundle.getResource("/resources/map/LeafletMap.html");
-			String strHtml = IOUtils.toString(resource.openStream());
-			
-			browserMap.setText(strHtml);
-			
+			browserMap.setUrl("/resources/map/LeafletMap.html");
 		} catch (Exception e) {
 			logger.error("initialize map initialize error", e);
 		}

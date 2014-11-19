@@ -19,5 +19,12 @@
             class="com.gaia3d.tadpole.spatial.data.core.spatical.table.ObjectViewerTableDecorator">
       </tableDecoration>
    </extension>
+   <extension
+         point="org.eclipse.equinox.http.registry.resources">
+      <resource
+            alias="/resources/map"
+            base-name="/resources/map">
+      </resource>
+   </extension>
 
 </plugin>
