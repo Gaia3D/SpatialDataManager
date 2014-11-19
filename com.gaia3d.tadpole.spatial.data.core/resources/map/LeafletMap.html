@@ -50,14 +50,26 @@
 		/*
 		* clear map
 		*/
-		clearLayersMap = function() {
+		clearAllLayersMap = function() {
 			try {
 				layerTadpole.clearLayers();
 				layerTadpoleClick.clearLayers();
 			} catch(err) {
-				console.log(err);
+				console.log("Rise exception(clearAllLayersMap function) : " + err);
 			}
 		};
+		
+		/*
+		* clear map
+		*/
+		clearClickedLayersMap = function() {
+			try {
+				layerTadpoleClick.clearLayers();
+			} catch(err) {
+				console.log("Rise exception(cleareClickedLayersMap function) : " + err);
+			}
+		};
+		
 		
 		/**
 		* drawing map
