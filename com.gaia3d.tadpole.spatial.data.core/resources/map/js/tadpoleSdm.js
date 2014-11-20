@@ -4,6 +4,9 @@ var layerTadpoleClick;
 
 $(document).ready(onLoad);
 
+/*
+ * initial event
+ */
 function onLoad() {
 	/* 지도의 center를 맞춘다 */
 	map = L.map('map').setView([37.55, 127.07], 1);
@@ -18,16 +21,16 @@ function onLoad() {
 	}).addTo(map);	
 
 	/** define layer */
-	layerTadpole = L.geoJson();
+	// layerTadpole = L.geoJson();
+	layerTadpole = L.TileLayer.maskCanvas();
+	if( typeof(sampleData) != 'undefined' ) {
+		layerTadpole.setData(sampleData);
+		map.fitBounds(layerTadpole.bounds);
+	}
+	layerTadpole.addTo(map);
+	
 	layerTadpoleClick = L.geoJson();
 }
-
-//-------- sample data -----------------------------------------
-/* 
-	var geojsonFeature = { "type": "Feature",   "geometry": {"type":"Point","coordinates":[126.977379,37.557121]} } ;
-	L.geoJson(geojsonFeature).addTo(map); 
-*/
-//-------- sample data -----------------------------------------
 
 /*
 * clear map
@@ -63,13 +66,16 @@ function drawingMap(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
 	try {
 		/* console.log("==> color : " + color);
 		console.log("==> geojsonFeature: \n" + txtGeoJSON ); */
+		console.log(txtGeoJSON);
 		
 		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpole = L.geoJson(geoJSON).addTo(map);
+		// layerTadpole = L.geoJson(geoJSON).addTo(map);
+		layerTadpole.setData(L.geoJson(geoJSON));
 		
 		/* first data set center */
-		map.setView([strCenterX, strCenterY], strZoom);
+		// map.setView([strCenterX, strCenterY], strZoom);
+		map.fitBounds(layerTadpole.bounds);
 		
 		var myStyle = {
 			    "color": txtColor,
@@ -95,4 +101,14 @@ function onClickPoint(geoJSON) {
 	} catch(err) {
 		console.log(err);
 	}
+};
+
+var loadData = function(url, layer) {
+    $.getJSON(url).success(function(data) {
+    	layer.setData(data);
+        map.fitBounds(layer.bounds);
+        map.addLayer(layer);
+    }).error(function(err) {
+        alert('An error occurred', err);
+    });
 };
