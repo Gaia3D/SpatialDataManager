@@ -11,6 +11,9 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
 
     initialize: function (options, data) {
         var self = this;
+        self._quad = None;
+        self.bound = None;
+        
         L.Util.setOptions(this, options);
 
         this.drawTile = function (tile, tilePoint, zoom) {
@@ -72,6 +75,46 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
                     y: d[yc] //lat
                 });
             });
+        }
+
+
+        if (this._map) {
+            this.redraw();
+        }
+    },
+
+    addData: function(dataset) {
+        var self = this;
+
+        if (dataset instanceof L.GeoJSON) {
+        	var subBounds = dataset.getBounds();
+        	if (!self.bound) self.bound = subBound;
+        	else self.bound.extend(subBounds);
+        	
+        	if (!this._quad) this._quad = new QuadTree(this._boundsToQuery(this.bounds), false, 6, 6);
+        	dataset.getLayers().forEach(function(d) {
+                self._quad.insert({
+                    x: d.feature.geometry.coordinates[0], 
+                    y: d.feature.geometry.coordinates[1] 
+                });
+            });
+        }
+        else if (dataset instanceof Array) {
+//            this.bounds = new L.LatLngBounds(dataset);
+//            this._quad = new QuadTree(this._boundsToQuery(this.bounds), false, 6, 6);
+//            var first = dataset[0];
+//            var xc = 1, yc = 0;
+//            if (first instanceof L.LatLng) {
+//                xc = "lng";
+//                yc = "lat";
+//            }
+//
+//            dataset.forEach(function(d) {
+//                self._quad.insert({
+//                    x: d[xc], //lng
+//                    y: d[yc] //lat
+//                });
+//            });
         }
 
 

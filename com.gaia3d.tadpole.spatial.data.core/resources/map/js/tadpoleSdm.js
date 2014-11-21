@@ -29,7 +29,15 @@ function onLoad() {
 	}
 	layerTadpole.addTo(map);
 	
-	layerTadpoleClick = L.geoJson();
+	var myStyle = {
+		    "color": "#FF0000", //txtColor,
+		    "weight": 5,
+		    "opacity": 0.65
+		};
+	var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
+	layerTadpoleClick = L.geoJson(geojsonFeature,{
+		style: myStyle
+	}).addTo(map);
 }
 
 /*
@@ -45,7 +53,7 @@ function clearAllLayersMap() {
 };
 
 /*
-* clear map
+* clear selected object
 */
 function clearClickedLayersMap() {
 	try {
@@ -76,17 +84,7 @@ function drawingMap(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
 		/* first data set center */
 		// map.setView([strCenterX, strCenterY], strZoom);
 		map.fitBounds(layerTadpole.bounds);
-		
-		var myStyle = {
-			    "color": txtColor,
-			    "weight": 5,
-			    "opacity": 0.65
-			};
-		var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
-		layerTadpoleClick = L.geoJson(geojsonFeature,{
-			style: myStyle
-		}).addTo(map);
-	} catch(err) {
+			} catch(err) {
 		console.log(err);
 	}
 };
@@ -101,14 +99,4 @@ function onClickPoint(geoJSON) {
 	} catch(err) {
 		console.log(err);
 	}
-};
-
-var loadData = function(url, layer) {
-    $.getJSON(url).success(function(data) {
-    	layer.setData(data);
-        map.fitBounds(layer.bounds);
-        map.addLayer(layer);
-    }).error(function(err) {
-        alert('An error occurred', err);
-    });
 };
