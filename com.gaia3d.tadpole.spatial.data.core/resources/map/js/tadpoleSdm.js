@@ -65,16 +65,15 @@ function clearClickedLayersMap() {
 
 
 /**
-* drawing map
+* Initialize drawing map 
 *
 * @param geoJSON initial map data
-* @param cole initialize user click color
+* @param txtColor initialize user click color
 */
-function drawingMap(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
+function drawingMapInit(txtGeoJSON, txtColor) {
 	try {
 		/* console.log("==> color : " + color);
 		console.log("==> geojsonFeature: \n" + txtGeoJSON ); */
-		console.log(txtGeoJSON);
 		
 		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
@@ -85,6 +84,20 @@ function drawingMap(txtGeoJSON, txtColor, strCenterX, strCenterY, strZoom) {
 		// map.setView([strCenterX, strCenterY], strZoom);
 		map.fitBounds(layerTadpole.bounds);
 			} catch(err) {
+		console.log(err);
+	}
+};
+
+/**
+* add map data
+*
+* @param geoJSON initial map data
+*/
+function drawMapAddData(txtGeoJSON) {
+	try {
+		var geoJSON = jQuery.parseJSON(txtGeoJSON);
+		layerTadpole.setData(L.geoJson(geoJSON));
+	} catch(err) {
 		console.log(err);
 	}
 };

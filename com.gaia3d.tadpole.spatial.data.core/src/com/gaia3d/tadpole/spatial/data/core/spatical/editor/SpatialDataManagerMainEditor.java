@@ -6,11 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.geojson.GeoJsonObject;
-import org.geojson.Geometry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gaia3d.tadpole.spatial.data.core.spatical.editor.inner.CenterObj;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
@@ -23,6 +19,9 @@ import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
  */
 public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler {
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
+	
+	/** 지도에 넘겨줄 카운트 */
+	public static final int intParseCount = 100;
 	
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
@@ -88,13 +87,35 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			for(Object objResult : resultData.toArray()) {
 				Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
 				
-				for(Integer index : listGisColumnIndex) {
-					listGisColumnGjson.add( (String)mapResult.get(index) );
-				}
+				// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
+				for(Integer index : listGisColumnIndex) listGisColumnGjson.add( (String)mapResult.get(index) );
 			}
 			
 			// ---------------------------------------------
-			drawMap(listGisColumnGjson, USER_CLICK_COLOR);
+			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
+			
+			int intStartIndex = 0;
+			for(int i=0; i<(listGisColumnGjson.size()/intParseCount+1); i++) {
+				List<String> listPartData = new ArrayList<>();
+				
+				if(listGisColumnGjson.size() < intParseCount+intStartIndex) {
+					if(logger.isDebugEnabled()) logger.debug("\t ###2. last point is start : " + intStartIndex + ", last size is " + listGisColumnGjson.size());
+					listPartData = listGisColumnGjson.subList(intStartIndex, listGisColumnGjson.size());
+				} else {
+					if(logger.isDebugEnabled()) logger.debug("\t ###1. point is start : " + intStartIndex + ", last size is " + (intParseCount+intStartIndex));
+					listPartData = listGisColumnGjson.subList(intStartIndex, intParseCount+intStartIndex);
+				}
+				
+				if(i == 0) {
+					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: first data size is " + listPartData.size());
+					drawMapInit(listPartData, USER_CLICK_COLOR);
+				} else {
+					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: other data size is " + listPartData.size());
+					drawMapAddData(listPartData);
+				}
+				
+				intStartIndex += intParseCount;
+			}
 		}
 	}
 	
@@ -129,44 +150,24 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 * @param strGeoJson
 	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
 	 */
-	private void drawMap(List<String> listGJson, String strColor) {
+	private void drawMapInit(List<String> listGJson, String strColor) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
 //		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
 		
-		CenterObj getCenter = getCenter(listGJson.get(0));
-		browserMap.evaluate(String.format("drawingMap('%s', '%s', '%s', '%s', '%s' );", 
-					strFullyGeojson, 
-					strColor, 
-					getCenter.getCenterX(), getCenter.getCenterY(), getCenter.getZoom())
-				);
+		browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
 	}
 	
 	/**
-	 * 검색된 첫번째 데이터를 지도 중앙에 표시합니다.
+	 * 지도에 데이터를 표시합니다.
+	 * 
+	 * @param strGeoJson
+	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
 	 */
-	private CenterObj getCenter(String str) {
-		if(null == str || "".equals(str)) return new CenterObj();
-
-		try {
-			GeoJsonObject object = new ObjectMapper().readValue(str, GeoJsonObject.class);
-			if (object instanceof Geometry) {
-				Geometry geometry = (Geometry)object;
-				if(logger.isDebugEnabled()) logger.debug("====================== Setting center ");
-				if(geometry.getCoordinates().size() >= 2) {
-					List listCoordinates = geometry.getCoordinates();
-					logger.debug("============> " + listCoordinates.get(0) +":" + listCoordinates.get(1));
-					
-					if(logger.isDebugEnabled()) logger.debug("center : X is  " + geometry.getCoordinates().get(0) + "\t:Y is " + geometry.getCoordinates().get(1));
-					
-					return new CenterObj(""+geometry.getCoordinates().get(0), ""+geometry.getCoordinates().get(1), "3");
-				}
-			}
-			
-		} catch (Exception e) {
-			logger.error("getJson parser exception", e);
-		}
+	private void drawMapAddData(List<String> listGJson) {
+		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
+//		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
 		
-		return new CenterObj();
+		browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
 	}
 	
 	/**
