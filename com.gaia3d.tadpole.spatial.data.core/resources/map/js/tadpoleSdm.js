@@ -30,7 +30,7 @@ function onLoad() {
 	layerTadpole.addTo(map);
 	
 	var myStyle = {
-		    "color": "#FF0000", //txtColor,
+		    "color": "#ff7800", //txtColor,
 		    "weight": 5,
 		    "opacity": 0.65
 		};
@@ -45,7 +45,7 @@ function onLoad() {
 */
 function clearAllLayersMap() {
 	try {
-		layerTadpole.clearLayers();
+		layerTadpole.initialize();
 		layerTadpoleClick.clearLayers();
 	} catch(err) {
 		console.log("Rise exception(clearAllLayersMap function) : " + err);
@@ -81,9 +81,9 @@ function drawingMapInit(txtGeoJSON, txtColor) {
 		layerTadpole.setData(L.geoJson(geoJSON));
 		
 		/* first data set center */
-		// map.setView([strCenterX, strCenterY], strZoom);
+		// map.setView([layerTadpole.bounds, strCenterY], strZoom);
 		map.fitBounds(layerTadpole.bounds);
-			} catch(err) {
+	} catch(err) {
 		console.log(err);
 	}
 };
@@ -96,7 +96,8 @@ function drawingMapInit(txtGeoJSON, txtColor) {
 function drawMapAddData(txtGeoJSON) {
 	try {
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpole.setData(L.geoJson(geoJSON));
+		layerTadpole.addData(L.geoJson(geoJSON));
+		map.fitBounds(layerTadpole.bounds);
 	} catch(err) {
 		console.log(err);
 	}
@@ -105,10 +106,16 @@ function drawMapAddData(txtGeoJSON) {
 /**
 * click event
 */
-function onClickPoint(geoJSON) {
+function onClickPoint(txtGeoJSON) {
 	try {
 		/* console.log("==> geojsonFeature: \n" + geoJSON ); */
-		layerTadpoleClick.addData(jQuery.parseJSON(geoJSON));
+		var geoJSON = jQuery.parseJSON(txtGeoJSON);
+		layerTadpoleClick.addData(geoJSON);
+		bounds = L.geoJson(geoJSON).getBounds();
+		map.fitBounds(bounds);
+		if (bounds.min == bounds.max) { // 점인 경우 약간 축소 처리
+			map.setZoom(map.getMaxZoom() - 2);
+		}
 	} catch(err) {
 		console.log(err);
 	}

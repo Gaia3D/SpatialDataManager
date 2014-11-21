@@ -21,7 +21,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
 	/** 지도에 넘겨줄 카운트 */
-	public static final int intParseCount = 100;
+	public static final int intParseCount = 1000;
 	
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
@@ -92,25 +92,25 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			}
 			
 			// ---------------------------------------------
-			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
+//			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
 			
 			int intStartIndex = 0;
 			for(int i=0; i<(listGisColumnGjson.size()/intParseCount+1); i++) {
 				List<String> listPartData = new ArrayList<>();
 				
 				if(listGisColumnGjson.size() < intParseCount+intStartIndex) {
-					if(logger.isDebugEnabled()) logger.debug("\t ###2. last point is start : " + intStartIndex + ", last size is " + listGisColumnGjson.size());
+//					if(logger.isDebugEnabled()) logger.debug("\t ###2. last point is start : " + intStartIndex + ", last size is " + listGisColumnGjson.size());
 					listPartData = listGisColumnGjson.subList(intStartIndex, listGisColumnGjson.size());
 				} else {
-					if(logger.isDebugEnabled()) logger.debug("\t ###1. point is start : " + intStartIndex + ", last size is " + (intParseCount+intStartIndex));
+//					if(logger.isDebugEnabled()) logger.debug("\t ###1. point is start : " + intStartIndex + ", last size is " + (intParseCount+intStartIndex));
 					listPartData = listGisColumnGjson.subList(intStartIndex, intParseCount+intStartIndex);
 				}
 				
 				if(i == 0) {
-					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: first data size is " + listPartData.size());
+//					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: first data size is " + listPartData.size());
 					drawMapInit(listPartData, USER_CLICK_COLOR);
 				} else {
-					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: other data size is " + listPartData.size());
+//					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: other data size is " + listPartData.size());
 					drawMapAddData(listPartData);
 				}
 				

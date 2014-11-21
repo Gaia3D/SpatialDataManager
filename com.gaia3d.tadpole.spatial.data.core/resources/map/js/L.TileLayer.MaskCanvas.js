@@ -11,8 +11,8 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
 
     initialize: function (options, data) {
         var self = this;
-        self._quad = None;
-        self.bound = None;
+        self._quad = null;
+        self.bound = null;
         
         L.Util.setOptions(this, options);
 
@@ -88,10 +88,19 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
 
         if (dataset instanceof L.GeoJSON) {
         	var subBounds = dataset.getBounds();
-        	if (!self.bound) self.bound = subBound;
-        	else self.bound.extend(subBounds);
+        	if (!self.bounds) 
+        		self.bounds = subBounds;
+        	else 
+        		self.bounds.extend(subBounds);
         	
-        	if (!this._quad) this._quad = new QuadTree(this._boundsToQuery(this.bounds), false, 6, 6);
+        	if (!self._quad) 
+        		self._quad = new QuadTree(this._boundsToQuery(self.bounds), false, 6, 6);
+        	else {
+        		tempQuad = new QuadTree(this._boundsToQuery(self.bounds), false, 6, 6);
+        		tempQuad.insert(self._quad.root.getChildren());
+        		self._quad = tempQuad;
+        	}
+        	
         	dataset.getLayers().forEach(function(d) {
                 self._quad.insert({
                     x: d.feature.geometry.coordinates[0], 
