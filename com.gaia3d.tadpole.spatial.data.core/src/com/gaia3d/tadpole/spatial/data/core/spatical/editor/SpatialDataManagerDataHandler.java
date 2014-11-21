@@ -80,12 +80,16 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 		composite.setLayout(gl_composite);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
-		Composite compositeHead = new Composite(composite, SWT.NONE);
-		compositeHead.setLayout(new GridLayout(1, false));
-		compositeHead.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		
-		Label lblMap = new Label(compositeHead, SWT.NONE);
-		lblMap.setText("Leaflet Map");
+//		------------ 화면 타이틀 처리 시작 -------------------------------
+//		java 에서 화면 타이틀을 보이지 않도록 수정합니다.(14.11.20)
+//		이것은 자바 스크립트에서 처리하도록 합니다. 
+//		Composite compositeHead = new Composite(composite, SWT.NONE);
+//		compositeHead.setLayout(new GridLayout(1, false));
+//		compositeHead.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+//		
+//		Label lblMap = new Label(compositeHead, SWT.NONE);
+//		lblMap.setText("Leaflet Map");
+//		------------ 화면 타이틀 처리 종료 -------------------------------
 		
 		Composite compositeBody = new Composite(composite, SWT.NONE);
 		compositeBody.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
