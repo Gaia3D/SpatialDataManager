@@ -28,7 +28,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
 	/** 지도에 넘겨줄 카운트 */
-	public static final int intParseCount = 100;
+	public static final int intParseCount = 1000;
 	
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 

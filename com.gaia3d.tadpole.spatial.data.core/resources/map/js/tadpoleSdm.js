@@ -21,12 +21,17 @@ function onLoad() {
 	}).addTo(map);	
 
 	/** define layer */
-	// layerTadpole = L.geoJson();
-	layerTadpole = L.TileLayer.maskCanvas();
+	layerTadpole = L.geoJson.canvas();
+//	layerTadpole = L.geoJson();
 	if( typeof(sampleData) != 'undefined' ) {
-		layerTadpole.setData(sampleData);
-		map.fitBounds(layerTadpole.bounds);
+		layerTadpole.addData(sampleData);
 	}
+	
+//	layerTadpole = L.TileLayer.maskCanvas();
+//	if( typeof(sampleData) != 'undefined' ) {
+//		layerTadpole.setData(sampleData);
+//		map.fitBounds(layerTadpole.bounds);
+//	}
 	layerTadpole.addTo(map);
 	
 	var myStyle = {
@@ -45,7 +50,8 @@ function onLoad() {
 */
 function clearAllLayersMap() {
 	try {
-		layerTadpole.initialize();
+//		layerTadpole.initialize();
+		layerTadpole.clearLayers();
 		layerTadpoleClick.clearLayers();
 	} catch(err) {
 		console.log("Rise exception(clearAllLayersMap function) : " + err);
@@ -77,12 +83,12 @@ function drawingMapInit(txtGeoJSON, txtColor) {
 		
 		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		// layerTadpole = L.geoJson(geoJSON).addTo(map);
-		layerTadpole.setData(L.geoJson(geoJSON));
+		layerTadpole.addData(geoJSON);
+//		layerTadpole.setData(L.geoJson(geoJSON));
 		
 		/* first data set center */
-		// map.setView([layerTadpole.bounds, strCenterY], strZoom);
-		map.fitBounds(layerTadpole.bounds);
+		map.fitBounds(layerTadpole.getBounds());
+//		map.fitBounds(layerTadpole.bounds);
 	} catch(err) {
 		console.log(err);
 	}
@@ -96,8 +102,10 @@ function drawingMapInit(txtGeoJSON, txtColor) {
 function drawMapAddData(txtGeoJSON) {
 	try {
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpole.addData(L.geoJson(geoJSON));
-		map.fitBounds(layerTadpole.bounds);
+		layerTadpole.addData(geoJSON);
+		map.fitBounds(layerTadpole.getBounds());
+//		layerTadpole.addData(L.geoJson(geoJSON));
+//		map.fitBounds(layerTadpole.bounds);
 	} catch(err) {
 		console.log(err);
 	}

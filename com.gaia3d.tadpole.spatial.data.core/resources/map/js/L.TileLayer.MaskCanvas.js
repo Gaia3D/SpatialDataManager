@@ -333,6 +333,25 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
 		var startPnt = null;
 		var p;
 		
+//		g.beginPath();
+//		polygon.forEach(function(pnt) {
+//			p = self._tilePoint(ctx, {x:pnt[0],y:pnt[1]});
+//			if (!startPnt) {
+//				startPnt = pnt;
+//				g.moveTo(p[0], p[1]);
+//				return;
+//			}
+//
+//			g.lineTo(p[0], p[1]);
+//			
+//			if (pnt[0] == startPnt[0] && pnt[1] == startPnt[1]) {
+//				startPnt = null;
+//			}
+//		});
+//		if (startPnt) g.lineTo(p[0], p[1]);
+//		g.closePath();
+//        g.fill();
+//        g.stroke();
 		g.beginPath();
 		polygon.forEach(function(pnt) {
 			p = self._tilePoint(ctx, {x:pnt[0],y:pnt[1]});
@@ -346,10 +365,13 @@ L.TileLayer.MaskCanvas = L.TileLayer.Canvas.extend({
 			
 			if (pnt[0] == startPnt[0] && pnt[1] == startPnt[1]) {
 				startPnt = null;
+				g.closePath();
 			}
 		});
-		if (startPnt) g.lineTo(p[0], p[1]);
-		g.closePath();
+		if (startPnt) {
+			g.lineTo(p[0], p[1]);
+			g.closePath();
+		}
         g.fill();
         g.stroke();
     }
