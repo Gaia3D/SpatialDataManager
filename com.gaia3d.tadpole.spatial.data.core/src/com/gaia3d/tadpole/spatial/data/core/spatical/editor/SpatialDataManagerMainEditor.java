@@ -6,9 +6,16 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
+import com.hangum.tadpole.rdb.core.Activator;
 import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 
 /**
@@ -21,7 +28,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
 	/** 지도에 넘겨줄 카운트 */
-	public static final int intParseCount = 1000;
+	public static final int intParseCount = 100;
 	
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
@@ -83,40 +90,113 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		//
 		if(!listGisColumnIndex.isEmpty()) {
-			List<String> listGisColumnGjson = new ArrayList<>();
+			final List<String> listGisColumnGjson = new ArrayList<>();
 			for(Object objResult : resultData.toArray()) {
 				Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
-				
 				// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
 				for(Integer index : listGisColumnIndex) listGisColumnGjson.add( (String)mapResult.get(index) );
 			}
 			
 			// ---------------------------------------------
 //			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
+			Job job = new Job("Drawing map") {
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					int intTotalDrawMapCount = listGisColumnGjson.size()/intParseCount+1;
+					monitor.beginTask("Drawing a map", intTotalDrawMapCount);
+					
+					try {
+						int intStartIndex = 0;
+						for(int i=0; i<intTotalDrawMapCount; i++) {
+							monitor.setTaskName("Drawing a map ( " + (i+1) + "/" + intTotalDrawMapCount + " )");
+							monitor.worked(1);
+							
+							List<String> listPartData = new ArrayList<>();
+							if(listGisColumnGjson.size() < intParseCount+intStartIndex) {
+								listPartData = listGisColumnGjson.subList(intStartIndex, listGisColumnGjson.size());
+							} else {
+								listPartData = listGisColumnGjson.subList(intStartIndex, intParseCount+intStartIndex);
+							}
+							
+							if(i == 0) {
+								drawMapInit(listPartData, USER_CLICK_COLOR);
+							} else {
+								drawMapAddData(listPartData);
+							}
+							
+							if(monitor.isCanceled()) {
+								if(logger.isDebugEnabled()) logger.debug("Stop map drawing.");
+								break;
+							}
+							
+							intStartIndex += intParseCount;
+						}	
+					} catch(Exception e) {
+						logger.error("Table Referesh", e);
+						
+						return new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
+					} finally {
+						monitor.done();
+					}
+					
+					/////////////////////////////////////////////////////////////////////////////////////////
+					return Status.OK_STATUS;
+				}
+				
+				/**
+				 * 지도에 데이터를 표시합니다.
+				 * 
+				 * @param strGeoJson
+				 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
+				 */
+				private void drawMapInit(final List<String> listGJson, final String strColor) {
+					browserMap.getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							final String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
+							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
+						}
+					});
+				}
+				
+				/**
+				 * 지도에 데이터를 표시합니다.
+				 * 
+				 * @param strGeoJson
+				 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
+				 */
+				private void drawMapAddData(final List<String> listGJson) {
+					browserMap.getDisplay().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							final String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
+							browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
+						}
+					});
+				}
+			};
 			
-			int intStartIndex = 0;
-			for(int i=0; i<(listGisColumnGjson.size()/intParseCount+1); i++) {
-				List<String> listPartData = new ArrayList<>();
+			// job의 event를 처리해 줍니다.
+			job.addJobChangeListener(new JobChangeAdapter() {
 				
-				if(listGisColumnGjson.size() < intParseCount+intStartIndex) {
-//					if(logger.isDebugEnabled()) logger.debug("\t ###2. last point is start : " + intStartIndex + ", last size is " + listGisColumnGjson.size());
-					listPartData = listGisColumnGjson.subList(intStartIndex, listGisColumnGjson.size());
-				} else {
-//					if(logger.isDebugEnabled()) logger.debug("\t ###1. point is start : " + intStartIndex + ", last size is " + (intParseCount+intStartIndex));
-					listPartData = listGisColumnGjson.subList(intStartIndex, intParseCount+intStartIndex);
-				}
-				
-				if(i == 0) {
-//					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: first data size is " + listPartData.size());
-					drawMapInit(listPartData, USER_CLICK_COLOR);
-				} else {
-//					if(logger.isDebugEnabled()) logger.debug("\t==>senddata: other data size is " + listPartData.size());
-					drawMapAddData(listPartData);
-				}
-				
-				intStartIndex += intParseCount;
-			}
-		}
+				public void done(IJobChangeEvent event) {
+					browserMap.getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							// 메인 에디터에 포커스를 이동하도록 합니다.
+							logger.debug("==11111111111111================> ended job");
+							mainEditor.setOrionTextFocus();
+						}
+					});
+				}	// end done
+			});	// end job
+			
+			job.setName("Drawing map job");
+			job.setUser(true);
+			job.setPriority(Job.SHORT);
+			job.schedule();
+			
+		}	// end if block
 	}
 	
 	/**
@@ -144,31 +224,31 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		browserMap.evaluate(String.format("onClickPoint('%s');", strFullyGeojson));
 	}
 
-	/**
-	 * 지도에 데이터를 표시합니다.
-	 * 
-	 * @param strGeoJson
-	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
-	 */
-	private void drawMapInit(List<String> listGJson, String strColor) {
-		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-//		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		
-		browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
-	}
-	
-	/**
-	 * 지도에 데이터를 표시합니다.
-	 * 
-	 * @param strGeoJson
-	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
-	 */
-	private void drawMapAddData(List<String> listGJson) {
-		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-//		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-		
-		browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
-	}
+//	/**
+//	 * 지도에 데이터를 표시합니다.
+//	 * 
+//	 * @param strGeoJson
+//	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
+//	 */
+//	private void drawMapInit(List<String> listGJson, String strColor) {
+//		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
+////		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
+//		
+//		browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
+//	}
+//	
+//	/**
+//	 * 지도에 데이터를 표시합니다.
+//	 * 
+//	 * @param strGeoJson
+//	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
+//	 */
+//	private void drawMapAddData(List<String> listGJson) {
+//		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
+////		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
+//		
+//		browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
+//	}
 	
 	/**
 	 * leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니
