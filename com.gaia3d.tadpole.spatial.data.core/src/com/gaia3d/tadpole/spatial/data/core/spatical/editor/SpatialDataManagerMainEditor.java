@@ -75,7 +75,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	public void queryEndedExecute(QueryExecuteResultDTO rsDAO) {
 		listGisColumnIndex.clear();
 		Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
-		List<Map<Integer, Object>> resultData = rsDAO.getDataList().getData();
+		final List<Map<Integer, Object>> resultData = rsDAO.getDataList().getData();
 
 		for(int i=0; i<mapColumnNames.size(); i++) {
 			String strSearchColumn = mapColumnNames.get(i);
@@ -90,18 +90,18 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		//
 		if(!listGisColumnIndex.isEmpty()) {
-			final List<String> listGisColumnGjson = new ArrayList<>();
-			for(Object objResult : resultData.toArray()) {
-				Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
-				// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
-				for(Integer index : listGisColumnIndex) listGisColumnGjson.add( (String)mapResult.get(index) );
-			}
-			
 			// ---------------------------------------------
 //			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
 			Job job = new Job("Drawing map") {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
+					final List<String> listGisColumnGjson = new ArrayList<>();
+					for(Object objResult : resultData.toArray()) {
+						Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
+						// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
+						for(Integer index : listGisColumnIndex) listGisColumnGjson.add( (String)mapResult.get(index) );
+					}
+					
 					int intTotalDrawMapCount = listGisColumnGjson.size()/intParseCount+1;
 					monitor.beginTask("Drawing a map", intTotalDrawMapCount);
 					
@@ -184,7 +184,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						@Override
 						public void run() {
 							// 메인 에디터에 포커스를 이동하도록 합니다.
-							logger.debug("==11111111111111================> ended job");
 							mainEditor.setOrionTextFocus();
 						}
 					});
@@ -220,35 +219,8 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 */
 	private void drawingUserColorMap(List<String> listGJson) {
 		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-//		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
 		browserMap.evaluate(String.format("onClickPoint('%s');", strFullyGeojson));
 	}
-
-//	/**
-//	 * 지도에 데이터를 표시합니다.
-//	 * 
-//	 * @param strGeoJson
-//	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
-//	 */
-//	private void drawMapInit(List<String> listGJson, String strColor) {
-//		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-////		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-//		
-//		browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
-//	}
-//	
-//	/**
-//	 * 지도에 데이터를 표시합니다.
-//	 * 
-//	 * @param strGeoJson
-//	 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
-//	 */
-//	private void drawMapAddData(List<String> listGJson) {
-//		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-////		if(logger.isDebugEnabled()) logger.debug(strFullyGeojson);
-//		
-//		browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
-//	}
 	
 	/**
 	 * leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니
