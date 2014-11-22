@@ -1,6 +1,5 @@
 package com.gaia3d.tadpole.spatial.data.core.spatical.editor;
 
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -10,20 +9,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.osgi.framework.Bundle;
 
-import com.gaia3d.tadpole.spatial.data.core.Activator;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
+import com.hangum.tadpole.rdb.core.editors.main.MainEditor;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.AMainEditorExtension;
 import com.hangum.tadpole.sql.dao.system.UserDBDAO;
 import com.hangum.tadpole.sql.util.resultset.ResultSetUtils;
@@ -52,7 +48,6 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	
 	/** 결과 중에 geojson column index */
 	protected List<Integer> listGisColumnIndex = new ArrayList<>();
-	
 
 	/** 
 	 * <pre>
@@ -70,7 +65,9 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 * @wbp.parser.entryPoint
 	 */
 	@Override
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent, MainEditor mainEditor) {
+		this.mainEditor = mainEditor;
+		
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout gl_composite = new GridLayout(1, false);
 		gl_composite.verticalSpacing = 2;
