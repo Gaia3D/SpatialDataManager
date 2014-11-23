@@ -1,15 +1,29 @@
+$(document).ready(onLoad);
+
 var map;
 var layerTadpole;
 var layerTadpoleClick;
 
-$(document).ready(onLoad);
+var options = 
+	{
+		autoZoom: true,
+		BasePointRadius: 3,
+		BaseLineColor: 'rgba(0, 0, 255, 0.2)',
+		BaseLineWidth: 2,
+		BaseFillColor: 'rgba(0, 0, 255, 0.2)',
+		SelectedPointRadius: 3,
+		SelectedLineColor: 'rgba(0, 0, 255, 0.2)',
+		SelectedLineWidth: 2,
+		SelectedFillColor: 'rgba(0, 0, 255, 0.2)'
+	}
+
 
 /*
  * initial event
  */
 function onLoad() {
 	/* 지도의 center를 맞춘다 */
-	map = L.map('map').setView([37.55, 127.07], 1);
+	map = L.map('map').setView([37.55, 127.07], 3);
 
 	/* 지도의 title을 표현한다 */
 	L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
@@ -21,17 +35,12 @@ function onLoad() {
 	}).addTo(map);	
 
 	/** define layer */
-	layerTadpole = L.geoJson.canvas();
 //	layerTadpole = L.geoJson();
+	layerTadpole = L.geoJson.canvas();
 	if( typeof(sampleData) != 'undefined' ) {
 		layerTadpole.addData(sampleData);
 	}
 	
-//	layerTadpole = L.TileLayer.maskCanvas();
-//	if( typeof(sampleData) != 'undefined' ) {
-//		layerTadpole.setData(sampleData);
-//		map.fitBounds(layerTadpole.bounds);
-//	}
 	layerTadpole.addTo(map);
 	
 	var myStyle = {
@@ -50,7 +59,6 @@ function onLoad() {
 */
 function clearAllLayersMap() {
 	try {
-//		layerTadpole.initialize();
 		layerTadpole.clearLayers();
 		layerTadpoleClick.clearLayers();
 	} catch(err) {
@@ -78,17 +86,15 @@ function clearClickedLayersMap() {
 */
 function drawingMapInit(txtGeoJSON, txtColor) {
 	try {
-		/* console.log("==> color : " + color);
-		console.log("==> geojsonFeature: \n" + txtGeoJSON ); */
+		clearAllLayersMap();
 		
 		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
 		layerTadpole.addData(geoJSON);
-//		layerTadpole.setData(L.geoJson(geoJSON));
 		
-		/* first data set center */
-		map.fitBounds(layerTadpole.getBounds());
-//		map.fitBounds(layerTadpole.bounds);
+		/* zoom to data bounds */
+		if (options.autoZoom)
+			map.fitBounds(layerTadpole.getBounds());
 	} catch(err) {
 		console.log(err);
 	}
@@ -103,9 +109,8 @@ function drawMapAddData(txtGeoJSON) {
 	try {
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
 		layerTadpole.addData(geoJSON);
-		map.fitBounds(layerTadpole.getBounds());
-//		layerTadpole.addData(L.geoJson(geoJSON));
-//		map.fitBounds(layerTadpole.bounds);
+		if (options.autoZoom)
+			map.fitBounds(layerTadpole.getBounds());
 	} catch(err) {
 		console.log(err);
 	}

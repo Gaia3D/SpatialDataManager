@@ -1,6 +1,12 @@
-/**
- * Canvas
- */
+/*
+ GeoJSON Layer using Canvas for leaflet, 
+ BJ Jang, November , 2014
+
+ Based on L.CanvasOverlay.js at http://bl.ocks.org/sumbera/11114288
+  
+ Apache License
+*/
+
 
 L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 
@@ -16,6 +22,10 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	},
 
 	addData: function (geojson) {
+		this._addData(geojson);
+		this.redraw();
+	},
+	_addData: function (geojson) {
 		var features = L.Util.isArray(geojson) ? geojson : geojson.features,
 		    i, len, feature;
 
@@ -24,7 +34,7 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 				// Only add this if geometry or geometries are set and not null
 				feature = features[i];
 				if (feature.geometry) {
-					this.addData(features[i]);
+					this._addData(features[i]);
 				}
 			}
 			return this;
@@ -34,11 +44,11 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 		if (!this._bounds) 
 			this._bounds = mbr;
 		else {
-			this._bounds.extend(mbr.min);
-			this._bounds.extend(mbr.max);
+			this._bounds.extend(mbr.getSouthWest());
+			this._bounds.extend(mbr.getNorthEast());
 		}
 		
-		geojson.mbr = mbr;
+		geojson.geometry.mbr = mbr;
 		
 		return this._data.push(geojson.geometry);
 	},
@@ -49,46 +59,39 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	},
 	
 	_calcMbr: function (coordinates) {
-		var retBounds;
-		
+		// case of point
 		if (typeof(coordinates[0])=="number") {
-			var p1 = L.point(coordinates[0], coordinates[1]),
-		    p2 = L.point(coordinates[0], coordinates[1]);
-			
-		    retBounds = L.bounds(p1, p2);
+			var p1 = L.latLng(coordinates[1], coordinates[0]),
+		    p2 = L.latLng(coordinates[1], coordinates[0]),
+		    retBounds = L.latLngBounds(p1, p2);
 		    return retBounds;
 		}
 		
-		if (typeof(coordinates[0][0])!="number") {
-			var totBounds = this._calcMbr(coordinates[0]);
+		// case of point array
+		if (typeof(coordinates[0][0])=="number") {
+			var retBounds;
+			var fstPnt = coordinates[0];
+			var p1 = L.latLng(fstPnt[1], fstPnt[0]),
+		    p2 = L.latLng(fstPnt[1], fstPnt[0]),
+		    retBounds = L.latLngBounds(p1, p2);
 			for (var i=1; i<coordinates.length; i++) {
-				var subBounds = this._calcMbr(coordinates[i]);
-				totBounds.extend(subBounds.min);
-				totBounds.extend(subBounds.max);
+				retBounds.extend(L.latLng(coordinates[i][1], coordinates[i][0]));
 			}
-			return totBounds;
+			return retBounds;
 		}
 		
-		var fstPnt = coordinates[0];
-		var p1 = L.point(fstPnt[0], fstPnt[1]),
-	    p2 = L.point(fstPnt[0], fstPnt[1]);
-		
-	    retBounds = L.bounds(p1, p2);
+		// case of array array
+		var totBounds = this._calcMbr(coordinates[0]);
 		for (var i=1; i<coordinates.length; i++) {
-			retBounds.extend(L.point(coordinates[i][0], coordinates[i][1]));
+			var subBounds = this._calcMbr(coordinates[i]);
+			totBounds.extend(subBounds.min);
+			totBounds.extend(subBounds.max);
 		}
-		
-		return retBounds;
+		return totBounds;
 	},
 	
 	getBounds : function() {
-		var minPnt = self._bounds.min;
-		var maxPnt = self._bounds.max;
-		
-		var southWest = L.latLng(minPnt.y, minPnt.x),
-	    northEast = L.latLng(maxPnt.y, maxPnt.x),
-	    bounds = L.latLngBounds(southWest, northEast);
-		return bounds;
+		return self._bounds;
 	},
 	
 	_drawPoint: function(canvasOverlay, ctx, coord) {
@@ -127,11 +130,15 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
         var ctx = params.canvas.getContext('2d');
         ctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
         ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
-        ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)';
+        ctx.strokeStyle = 'rgba(0, 0, 255, 0.3)';
         ctx.lineWidth = 2;
+        
+        var viewBounds = params.bounds;
        
         for (var i=0; i<this._data.length; i++) {
         	geometry = this._data[i];
+        	if (!viewBounds.intersects(geometry.mbr))
+        		continue;
         	
         	switch(geometry.type) {
         	case "Point":
