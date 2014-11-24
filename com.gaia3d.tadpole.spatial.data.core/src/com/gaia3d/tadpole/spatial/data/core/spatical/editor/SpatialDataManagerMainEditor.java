@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
+import com.gaia3d.tadpole.spatial.data.core.preference.data.SpatialGetPreferenceData;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.rdb.core.Activator;
@@ -28,8 +29,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
 	/** 지도에 넘겨줄 카운트 */
-	public static final int intParseCount = 1000;
-	
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
 	 */
@@ -39,10 +38,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 * postgis의 쿼리 결과 leaflet에 주기위해 부분 GEOJSON
 	 */
 	private static final String TMPELATE_GEO_JSON = "{ \"type\": \"Feature\", \"geometry\": %s }";
-	
-	/** 사용자 지정 컬러 */
-	private static final String USER_CLICK_COLOR = "#ff7800";
-	
 	
 	@Override
 	public void resultSetClick(int selectIndex, Map<Integer, Object> mapColumns) {
@@ -87,6 +82,12 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		/** 지도를 초기화 합니다 */
 		clearAllLayersMap();
+		
+		final int intParseCount = SpatialGetPreferenceData.getSendMapDataCount();
+		
+		/** 사용자 지정 컬러 */
+		final String USER_CLICK_COLOR = SpatialGetPreferenceData.getUserClickedColor();
+		logger.debug("## USER_CLICK_COLOR : " + USER_CLICK_COLOR);
 		
 		//
 		if(!listGisColumnIndex.isEmpty()) {

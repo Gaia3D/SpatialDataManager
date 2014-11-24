@@ -26,5 +26,13 @@
             base-name="/resources/map">
       </resource>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.gaia3d.tadpole.spatial.data.core.preference.ui.SpatialDataManagerPreference"
+            id="com.gaia3d.tadpole.spatial.data.core.page.default"
+            name="Spatial Data Manager">
+      </page>
+   </extension>
 
 </plugin>
