@@ -6,7 +6,7 @@ var layerTadpoleClick;
 
 var options = {
 		autoZoom: true,
-		displayType: "normal"
+		displayType: "heatmap"
 }
 
 options.canvasOptions = 
