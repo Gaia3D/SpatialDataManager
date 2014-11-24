@@ -1,4 +1,4 @@
-package com.gaia3d.tadpole.spatial.data.core.spatical.connection;
+package com.gaia3d.tadpole.spatial.data.core.ui.connection;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

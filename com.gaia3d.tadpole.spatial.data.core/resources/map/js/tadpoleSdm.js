@@ -1,3 +1,11 @@
+/*
+ * define java browfunction code
+ */
+var editorService = {
+	/** save option */
+	SAVE_OPTION			: "5"
+};
+
 $(document).ready(onLoad);
 
 var map;
@@ -20,6 +28,19 @@ options.canvasOptions =
 		SelectedLineWidth: 2,
 		SelectedFillColor: 'rgba(0, 0, 255, 0.2)'
 	};
+
+/**
+ * save option
+ * 
+ * @param options
+ */
+function saveOption(options) {
+	try {
+		TadpoleBrowserHandler(editorService.SAVE_OPTION, options);
+    } catch(e) {
+		console.log(e);
+	}
+}
 
 options.heatmapOptions = {
 		  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
@@ -117,9 +138,9 @@ function clearClickedLayersMap() {
 * Initialize drawing map 
 *
 * @param geoJSON initial map data
-* @param txtColor initialize user click color
+* @param txtUserOption initialize user options
 */
-function drawingMapInit(txtGeoJSON, txtColor) {
+function drawingMapInit(txtGeoJSON, txtUserOption) {
 	try {
 		clearAllLayersMap();
 		

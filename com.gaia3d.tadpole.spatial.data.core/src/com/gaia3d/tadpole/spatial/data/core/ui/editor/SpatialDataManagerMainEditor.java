@@ -1,4 +1,4 @@
-package com.gaia3d.tadpole.spatial.data.core.spatical.editor;
+package com.gaia3d.tadpole.spatial.data.core.ui.editor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
-import com.gaia3d.tadpole.spatial.data.core.preference.data.SpatialGetPreferenceData;
+import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPreferenceData;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.rdb.core.Activator;
@@ -83,11 +83,10 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		/** 지도를 초기화 합니다 */
 		clearAllLayersMap();
 		
-		final int intParseCount = SpatialGetPreferenceData.getSendMapDataCount();
-		
-		/** 사용자 지정 컬러 */
-		final String USER_CLICK_COLOR = SpatialGetPreferenceData.getUserClickedColor();
-		logger.debug("## USER_CLICK_COLOR : " + USER_CLICK_COLOR);
+		/** 사용자 멤 데이터 */
+		final int INT_SEND_COUNT = SpatialGetPreferenceData.getSendMapDataCount();
+		/** 사용자 환경설정 */
+		final String USER_OPTIONS = SpatialGetPreferenceData.getUserOptions();
 		
 		//
 		if(!listGisColumnIndex.isEmpty()) {
@@ -103,7 +102,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						for(Integer index : listGisColumnIndex) listGisColumnGjson.add( (String)mapResult.get(index) );
 					}
 					
-					int intTotalDrawMapCount = listGisColumnGjson.size()/intParseCount+1;
+					int intTotalDrawMapCount = listGisColumnGjson.size()/INT_SEND_COUNT+1;
 					monitor.beginTask("Drawing a map", intTotalDrawMapCount);
 					
 					try {
@@ -113,14 +112,14 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 							monitor.worked(1);
 							
 							List<String> listPartData = new ArrayList<>();
-							if(listGisColumnGjson.size() < intParseCount+intStartIndex) {
+							if(listGisColumnGjson.size() < INT_SEND_COUNT+intStartIndex) {
 								listPartData = listGisColumnGjson.subList(intStartIndex, listGisColumnGjson.size());
 							} else {
-								listPartData = listGisColumnGjson.subList(intStartIndex, intParseCount+intStartIndex);
+								listPartData = listGisColumnGjson.subList(intStartIndex, INT_SEND_COUNT+intStartIndex);
 							}
 							
 							if(i == 0) {
-								drawMapInit(listPartData, USER_CLICK_COLOR);
+								drawMapInit(listPartData, USER_OPTIONS);
 							} else {
 								drawMapAddData(listPartData);
 							}
@@ -130,7 +129,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 								break;
 							}
 							
-							intStartIndex += intParseCount;
+							intStartIndex += INT_SEND_COUNT;
 						}	
 					} catch(Exception e) {
 						logger.error("Table Referesh", e);
@@ -147,15 +146,17 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				/**
 				 * 지도에 데이터를 표시합니다.
 				 * 
-				 * @param strGeoJson
-				 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
+				 * @param strGeoJson 지도데이터 
+				 * @param strUserOptions 사용자 옵션 
 				 */
-				private void drawMapInit(final List<String> listGJson, final String strColor) {
+				private void drawMapInit(final List<String> listGJson, final String strUserOptions) {
 					browserMap.getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							final String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", strFullyGeojson, strColor));
+							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", 
+																TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson)), 
+																TadpoleEditorUtils.getGrantText(strUserOptions))
+												);
 						}
 					});
 				}
@@ -170,8 +171,9 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 					browserMap.getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							final String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-							browserMap.evaluate(String.format("drawMapAddData('%s');", strFullyGeojson));
+							browserMap.evaluate(String.format("drawMapAddData('%s');", 
+													TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson)))
+												);
 						}
 					});
 				}
@@ -241,5 +243,5 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		return String.format(TMPELATE_GROUP_GEO_JSON, tmpSBGeoJson.toString());
 	}
-
+	
 }

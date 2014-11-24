@@ -1,4 +1,4 @@
-package com.gaia3d.tadpole.spatial.data.core.spatical.editor.inner;
+package com.gaia3d.tadpole.spatial.data.core.ui.editor.inner;
 
 /**
  * map의 center를 설정하는 object
