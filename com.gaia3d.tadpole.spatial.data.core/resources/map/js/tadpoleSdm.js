@@ -125,8 +125,9 @@ function onClickPoint(txtGeoJSON) {
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
 		layerTadpoleClick.addData(geoJSON);
 		bounds = L.geoJson(geoJSON).getBounds();
+//		bounds = layerTadpole._calcMbr(geoJSON.features[0].geometry.coordinates);
 		map.fitBounds(bounds);
-		if (bounds.min == bounds.max) { // 점인 경우 약간 축소 처리
+		if (bounds.getSouthWest() == bounds.getNorthEast()) { // 점인 경우 약간 축소 처리
 			map.setZoom(map.getMaxZoom() - 2);
 		}
 	} catch(err) {
