@@ -20,6 +20,16 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 			this.addData(geojson);
 		}
 	},
+	
+	setOptions: function (options) {
+		L.setOptions(this, options);
+	},
+
+	setData: function (geojson) {
+		this.clearLayers();
+		this._addData(geojson);
+		this.redraw();
+	},
 
 	addData: function (geojson) {
 		this._addData(geojson);
@@ -91,13 +101,13 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	},
 	
 	getBounds : function() {
-		return self._bounds;
+		return this._bounds;
 	},
 	
 	_drawPoint: function(canvasOverlay, ctx, coord) {
 		dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 3, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, this.options.SelectedPointRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();			
 	},
@@ -129,9 +139,9 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 		self = this;
         var ctx = params.canvas.getContext('2d');
         ctx.clearRect(0, 0, params.canvas.width, params.canvas.height);
-        ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
-        ctx.strokeStyle = 'rgba(0, 0, 255, 0.3)';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = this.options.BaseFillColor;
+        ctx.strokeStyle = this.options.BaseLineColor;
+        ctx.lineWidth = this.options.BaseLineWidth;
         
         var viewBounds = params.bounds;
        

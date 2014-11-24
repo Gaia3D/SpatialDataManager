@@ -4,9 +4,13 @@ var map;
 var layerTadpole;
 var layerTadpoleClick;
 
-var options = 
-	{
+var options = {
 		autoZoom: true,
+		displayType: "normal"
+}
+
+options.canvasOptions = 
+	{
 		BasePointRadius: 3,
 		BaseLineColor: 'rgba(0, 0, 255, 0.2)',
 		BaseLineWidth: 2,
@@ -15,7 +19,26 @@ var options =
 		SelectedLineColor: 'rgba(0, 0, 255, 0.2)',
 		SelectedLineWidth: 2,
 		SelectedFillColor: 'rgba(0, 0, 255, 0.2)'
-	}
+	};
+
+options.heatmapOptions = {
+		  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+		  // if scaleRadius is false it will be the constant radius used in pixels
+		  "radius": 0.01,
+		  "maxOpacity": .8, 
+		  // scales the radius based on map zoom
+		  "scaleRadius": true, 
+		  // if set to false the heatmap uses the global maximum for colorization
+		  // if activated: uses the data maximum within the current map boundaries 
+		  //   (there will always be a red spot with useLocalExtremas true)
+		  "useLocalExtrema": true,
+		  // which field name in your data represents the latitude - default "lat"
+		  latField: 'lat',
+		  // which field name in your data represents the longitude - default "lng"
+		  lngField: 'lng',
+		  // which field name in your data represents the data value - default "value"
+		  valueField: 'count'
+		};
 
 
 /*
@@ -25,7 +48,7 @@ function onLoad() {
 	/* 지도의 center를 맞춘다 */
 	map = L.map('map').setView([37.55, 127.07], 3);
 
-	/* 지도의 title을 표현한다 */
+	/* Base Layer */
 	L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -34,22 +57,34 @@ function onLoad() {
 		id: 'examples.map-20v6611k'
 	}).addTo(map);	
 
-	/** define layer */
-//	layerTadpole = L.geoJson();
-	layerTadpole = L.geoJson.canvas();
+	switch (options.displayType) {
+	case "normal":
+		/* Normal Layer */
+		layerTadpole = L.geoJson.canvas();
+		layerTadpole.setOptions(options.canvasOptions);
+		layerTadpole.addTo(map);
+		break;
+	case "heatmap":
+		/* heatmap Layer */
+		layerTadpole = L.geoJson.heatmap(null, options.heatmapOptions);
+		layerTadpole.addTo(map);
+		break;
+	
+	}
+	
+	
+	// sample data
 	if( typeof(sampleData) != 'undefined' ) {
 		layerTadpole.addData(sampleData);
 	}
 	
-	layerTadpole.addTo(map);
-	
+	/* Clicked Object Layer */
 	var myStyle = {
 		    "color": "#ff7800", //txtColor,
 		    "weight": 5,
 		    "opacity": 0.65
 		};
-	var geojsonFeature = { "type": "Feature",   "geometry": {"type":"MultiPolygon","coordinates":[0, 0]} };
-	layerTadpoleClick = L.geoJson(geojsonFeature,{
+	layerTadpoleClick = L.geoJson(null,{
 		style: myStyle
 	}).addTo(map);
 }
