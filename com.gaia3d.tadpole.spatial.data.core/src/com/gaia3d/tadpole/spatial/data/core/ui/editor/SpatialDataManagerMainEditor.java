@@ -17,6 +17,7 @@ import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPrefere
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.rdb.core.Activator;
+import com.hangum.tadpole.rdb.core.Messages;
 import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 
 /**
@@ -38,24 +39,72 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 * postgis의 쿼리 결과 leaflet에 주기위해 부분 GEOJSON
 	 */
 	private static final String TMPELATE_GEO_JSON = "{ \"type\": \"Feature\", \"geometry\": %s }";
+
+	/** job */
+	private Job jobMouseClick = null;
 	
 	@Override
-	public void resultSetClick(int selectIndex, Map<Integer, Object> mapColumns) {
+	public void resultSetClick(final int selectIndex, final Map<Integer, Object> mapColumns) {
 //		if(logger.isDebugEnabled()) {
 //			logger.debug("=============================================================");
 //			logger.debug("Clieck column index is " + selectIndex );
 //			logger.debug("Clieck column data is " + mapColumns.get(selectIndex));
 //		}
 		
-		List<String> listGJson = new ArrayList<>();
-		for(Integer index : listGisColumnIndex) {
-			listGJson.add((String)mapColumns.get(index));
+		if(jobMouseClick != null) {
+			if(Job.RUNNING == jobMouseClick.getState()) {
+				if(logger.isDebugEnabled()) logger.debug("\t\t================= return already running query job ");
+				return;
+			}
 		}
 		
-		clearClickedLayersMap();
-		drawingUserColorMap(listGJson);
-	}
+		jobMouseClick = new Job(Messages.MainEditor_45) {
+			@Override
+			public IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("click progress", IProgressMonitor.UNKNOWN);
 
+				/////////////////////////////////////////////////////////////////////////////////////////
+				final List<String> listGJson = new ArrayList<>();
+				for(Integer index : listGisColumnIndex) {
+					listGJson.add((String)mapColumns.get(index));
+				}
+				
+				browserMap.getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						clearClickedLayersMap();
+						drawingUserColorMap(listGJson);
+					}
+				});
+				
+				/////////////////////////////////////////////////////////////////////////////////////////
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+			
+			/**
+			 * 사용자가 클릭한 layer를 삭제한다. 
+			 */
+			private void clearClickedLayersMap() {
+				browserMap.evaluate("clearClickedLayersMap();");
+			}
+			
+			/**
+			 * 지도에 데이터를 표시합니다.
+			 * 
+			 * @param strGeoJson
+			 */
+			private void drawingUserColorMap(final List<String> listGJson) {
+				browserMap.evaluate(String.format("onClickPoint('%s');", TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson))));
+			}
+
+		};
+	
+		jobMouseClick.setPriority(Job.INTERACTIVE);
+		jobMouseClick.setName("Result clikc");
+		jobMouseClick.schedule();
+    }
+	
 	/**
 	 * 결과 테이블을 더블클릭했을 경우 
 	 */
@@ -206,23 +255,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 */
 	private void clearAllLayersMap() {
 		browserMap.evaluate("clearAllLayersMap();");
-	}
-	
-	/**
-	 * 사용자가 클릭한 layer를 삭제한다. 
-	 */
-	private void clearClickedLayersMap() {
-		browserMap.evaluate("clearClickedLayersMap();");
-	}
-	
-	/**
-	 * 지도에 데이터를 표시합니다.
-	 * 
-	 * @param strGeoJson
-	 */
-	private void drawingUserColorMap(List<String> listGJson) {
-		String strFullyGeojson = TadpoleEditorUtils.getGrantText(fullyGeoJSON(listGJson));
-		browserMap.evaluate(String.format("onClickPoint('%s');", strFullyGeojson));
 	}
 	
 	/**
