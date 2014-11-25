@@ -1,4 +1,4 @@
-package com.gaia3d.tadpole.spatial.data.core.spatical.editor;
+package com.gaia3d.tadpole.spatial.data.core.ui.editor;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,10 +12,13 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialEditorFunction;
+import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialFunctionService;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
@@ -60,6 +63,8 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	
 	/** 지도가 들어갈 브라우저 */
 	protected Browser browserMap;
+	/** browser.browserFunction의 서비스 헨들러 */
+	protected BrowserFunction editorService;
 	
 	/**
 	 * @wbp.parser.entryPoint
@@ -151,6 +156,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 		
 		try {
 			browserMap.setUrl("/resources/map/LeafletMap.html");
+			registerBrowserFunctions();
 		} catch (Exception e) {
 			logger.error("initialize map initialize error", e);
 		}
@@ -222,4 +228,13 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 
 		return strSQL;
 	}
+	
+	/**
+	 * register browser function
+	 * 
+	 */
+	protected void registerBrowserFunctions() {
+		editorService = new SpatialFunctionService(browserMap, SpatialEditorFunction.LEAFLET_SERVICE_HANDLER);
+	}
+
 }

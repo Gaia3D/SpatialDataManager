@@ -4,19 +4,19 @@
    <extension
          point="com.hangum.tadpole.rdb.core.extensionpoint.definition.main.editor">
       <mainEditor
-            class="com.gaia3d.tadpole.spatial.data.core.spatical.editor.SpatialDataManagerMainEditor">
+            class="com.gaia3d.tadpole.spatial.data.core.ui.editor.SpatialDataManagerMainEditor">
       </mainEditor>
    </extension>
    <extension
          point="com.hangum.tadpole.rdb.core.extensionpoint.definition.connection.decoration">
       <client
-            class="com.gaia3d.tadpole.spatial.data.core.spatical.connection.ConnectionViewerDecorator">
+            class="com.gaia3d.tadpole.spatial.data.core.ui.connection.ConnectionViewerDecorator">
       </client>
    </extension>
    <extension
          point="com.hangum.tadpole.rdb.core.extensionpoint.definition.table.decoration">
       <tableDecoration
-            class="com.gaia3d.tadpole.spatial.data.core.spatical.table.ObjectViewerTableDecorator">
+            class="com.gaia3d.tadpole.spatial.data.core.ui.table.ObjectViewerTableDecorator">
       </tableDecoration>
    </extension>
    <extension
@@ -29,7 +29,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="com.gaia3d.tadpole.spatial.data.core.preference.ui.SpatialDataManagerPreference"
+            class="com.gaia3d.tadpole.spatial.data.core.ui.preference.ui.SpatialDataManagerPreference"
             id="com.gaia3d.tadpole.spatial.data.core.page.default"
             name="Spatial Data Manager">
       </page>
