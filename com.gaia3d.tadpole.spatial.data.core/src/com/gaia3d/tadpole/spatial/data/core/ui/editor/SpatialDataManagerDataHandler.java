@@ -197,7 +197,19 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 					}
 				}	// end while
 				
+				// 컬럼이 있는 것이다.
 				if(!addCostumeColumn.isEmpty()) {
+					
+					// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
+					mainEditor.getSashFormExtension().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							int []intWidgetSizes = mainEditor.getSashFormExtension().getWeights();
+							if(intWidgetSizes[0] != 100) {
+								mainEditor.getSashFormExtension().setWeights(new int[] {70, 30});
+							}
+						}
+					});
+					// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
 					
 					String strAddCustomeColumn = "";
 					for(int i=0; i<addCostumeColumn.size(); i++) {
@@ -205,7 +217,6 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 						
 						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn);
 						else strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
-						
 					}
 					
 					if(logger.isDebugEnabled()) {
