@@ -11,9 +11,7 @@
 L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 
 	initialize: function (geojson, options) {
-		this.cfg = options;
-		
-		HeatmapOverlay.prototype.initialize(options);
+		this.setOptions(options);
 
 		this._data = [];
 		this._bounds = null;
@@ -22,6 +20,20 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		if (geojson) {
 			this.addData(geojson);
 		}
+	},
+
+	clearLayers: function() {
+		this._data = [];
+		this._bounds = null;
+	},
+	
+	setOptions: function (options) {
+		this.cfg = options;
+		this.cfg.latField = 1;
+		this.cfg.lngField = 0;
+		this.cfg.valueField = null;
+
+		HeatmapOverlay.prototype.initialize(this.cfg);
 	},
 
 	setData: function (geojson) {
@@ -62,14 +74,8 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		return this;
 	},
 	
-	_registPoint: function(latlng, value) {
-		var dataObj = { latlng: latlng, value: value };
-		this._data.push(dataObj);
-	},
-	
-	clearLayers: function() {
-		this._data = [];
-		this._bounds = null;
+	_registPoint: function(point) {
+		this._data.push(point);
 	},
 	
 	_registDataAndCalcMbr: function (coordinates) {
@@ -79,7 +85,7 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		    p2 = L.latLng(coordinates[1], coordinates[0]),
 		    retBounds = L.latLngBounds(p1, p2);
 			
-			this._registPoint(p1, 1);
+			this._registPoint(coordinates);
 			
 		    return retBounds;
 		}
@@ -94,8 +100,7 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 			for (var i=1; i<coordinates.length; i++) {
 				retBounds.extend(L.latLng(coordinates[i][1], coordinates[i][0]));
 				
-				var p1 = new L.LatLng(coordinates[i][1], coordinates[i][0]);
-				this._registPoint(p1, 1);
+				this._registPoint(coordinates[i]);
 			}
 			return retBounds;
 		}
@@ -110,7 +115,63 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		return totBounds;
 	},
 	
-    addTo: function (map) {
+	_update: function() {
+		    var bounds, zoom, scale;
+
+		    bounds = this._map.getBounds();
+		    zoom = this._map.getZoom();
+		    scale = Math.pow(2, zoom);
+
+		    if (this._data.length == 0) {
+		      return;
+		    }
+
+		    var generatedData = { max: this._max };
+		    var latLngPoints = [];
+		    var radiusMultiplier = this.cfg.scaleRadius ? scale : 1;
+		    var localMax = 0;
+		    var valueField = this.cfg.valueField;
+		    var len = this._data.length;
+		  
+		    while (len--) {
+		      var entry = this._data[len];
+		      var value = entry[valueField];
+		      var latlng = new L.LatLng(entry[1], entry[0]);
+
+
+		      // we don't wanna render points that are not even on the map ;-)
+		      if (!bounds.contains(latlng)) {
+		        continue;
+		      }
+		      // local max is the maximum within current bounds
+		      if (value > localMax) {
+		        localMax = value;
+		      }
+
+		      var point = this._map.latLngToContainerPoint(latlng);
+		      var latlngPoint = { x: Math.round(point.x), y: Math.round(point.y) };
+		      latlngPoint[valueField] = value;
+
+		      var radius;
+
+		      if (entry.radius) {
+		        radius = entry.radius * radiusMultiplier;
+		      } else {
+		        radius = (this.cfg.radius || 2) * radiusMultiplier;
+		      }
+		      latlngPoint.radius = radius;
+		      latLngPoints.push(latlngPoint);
+		    }
+		    if (this.cfg.useLocalExtrema) {
+		      generatedData.max = localMax;
+		    }
+
+		    generatedData.data = latLngPoints;
+
+		    this._heatmap.setData(generatedData);
+		  },
+		  
+		  addTo: function (map) {
         map.addLayer(this);
         return this;
     },
