@@ -14,7 +14,7 @@ var layerTadpoleClick;
 
 var options = {
 		autoZoom: true,
-		displayType: "heatmap"
+		displayType: "cluster"
 }
 
 options.canvasOptions = 
@@ -84,7 +84,11 @@ function onLoad() {
 		layerTadpole = L.geoJson.heatmap(null, options.heatmapOptions);
 		layerTadpole.addTo(map);
 		break;
-	
+	case "cluster":
+		/* point cluster */
+		layerTadpole = L.geoJson.cluster(null, null);
+		layerTadpole.addTo(map);
+		break;
 	}
 	
 	
