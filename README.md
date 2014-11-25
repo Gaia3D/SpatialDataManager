@@ -2,12 +2,12 @@ Spatial Data Manager란?
 ==================
 Spatial Data Manager는 Tadpole에 공간정보 조회기능을 추가하는 확장기능입니다.
 DBMS에 들어있는 공간데이터나 쿼리로 조회된 데이터를 시각적으로 확인하는 것이 주 목적이며, 
-공간정보가 있는 데이블과 컬럼을 표시하는 기능을 지원합니다.https://github.com/Gaia3D/SpatialDataManager/edit/master/README.md#
+공간정보가 있는 데이블과 컬럼을 표시하는 기능을 지원합니다.
 
 사용 라이브러리
 ===============
 Spatial Data Manager는 Tadpole DB Hub[1]를 기반으로 하며, 
-지도 표시를 위해 LefletJS[2]를 사용합니다.
+지도 표시를 위해 LeafletJS[2]를 사용합니다.
 
 License
 =======
