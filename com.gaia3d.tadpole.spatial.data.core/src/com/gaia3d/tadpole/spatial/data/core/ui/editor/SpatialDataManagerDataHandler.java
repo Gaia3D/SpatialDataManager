@@ -25,6 +25,7 @@ import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.rdb.core.editors.main.MainEditor;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.AMainEditorExtension;
 import com.hangum.tadpole.sql.dao.system.UserDBDAO;
+import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.sql.util.resultset.ResultSetUtils;
 
 /**
@@ -49,8 +50,14 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 */
 	protected static final String GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
-	/** 결과 중에 geojson column index */
-	protected List<Integer> listGisColumnIndex = new ArrayList<>();
+	/** 쿼리 결과 셋 */
+	protected QueryExecuteResultDTO rsDAO = null;
+
+	/**
+	 * 쿼리 중에 리얼 gis 컬럼리스트이다.
+	 * 리얼은 쿼리를 조작하여 gis 컬럼을 넣는데, 이 컬럼은 빠져있다.
+	 */
+	protected List<Integer> listRealGisColumnIndex = new ArrayList<Integer>();
 
 	/** 
 	 * <pre>
@@ -170,8 +177,8 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 */
 	@Override
 	public String sqlCostume(String strSQL) {
-//		if(logger.isDebugEnabled()) logger.debug("orginal sql is " + strSQL);
 		List<String> addCostumeColumn = new ArrayList<String>();
+		listRealGisColumnIndex.clear();
 		
 		Connection conn = null;
 		Statement stmt = null;
@@ -182,6 +189,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 				rs = stmt.executeQuery(strSQL);
 				
 				Iterator<Map> iteMap = ResultSetUtils.getColumnTableColumnName(getEditorUserDB(), rs.getMetaData()).values().iterator();
+				int intIndex = 0;
 				while(iteMap.hasNext()) {
 					Map mapOriginal = (Map)iteMap.next();
 					
@@ -193,11 +201,13 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 						
 						if(listColumn.contains(strSearchColumn)) {
 							addCostumeColumn.add(strSearchColumn);
+							listRealGisColumnIndex.add(intIndex);
 						}
 					}
+					intIndex++;
 				}	// end while
 				
-				// 컬럼이 있는 것이다.
+				// geo 컬럼이 있는 것이다.
 				if(!addCostumeColumn.isEmpty()) {
 					
 					// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
