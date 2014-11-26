@@ -1,5 +1,5 @@
 /*
- GeoJSON Layer using Canvas for leaflet, 
+ GeoJSON Layer using Heatmap for leaflet, 
  BJ Jang, November , 2014
 
  Based on leaflet-heatmap.js at http://www.patrick-wied.at/static/heatmapjs/example-heatmap-leaflet.html
