@@ -24,17 +24,15 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 
-import com.gaia3d.tadpole.spatial.data.core.Activator;
+import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.ITableDecorationExtension;
 import com.hangum.tadpole.sql.dao.system.UserDBDAO;
-import com.swtdesigner.ResourceManager;
 
 
 /**
- * ObjectViewer의 Table decoration구현합니다. 
- * 
+ * ObjectViewer의 Table decoration 구현합니다. 
  * 
  * @author hangum
  *
@@ -44,11 +42,14 @@ public class ObjectViewerTableDecorator implements ITableDecorationExtension {
 
 	@Override
 	public boolean initExtension(UserDBDAO userDB) {
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+		if(userDB == null) return false;
+		
+		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			try {
 				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery("SELECT * FROM geometry_columns");
@@ -67,26 +68,23 @@ public class ObjectViewerTableDecorator implements ITableDecorationExtension {
 						mapColumnDescList.put(tableName, listColumns);
 					}
 				}
-				
+					
 				return true;
+			} catch (Exception e1) {
+				logger.error("GoogleMap extension" + e1);
+			} finally {
+				if(rs != null) try {rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
-
-		} catch (Exception e1) {
-			logger.error("GoogleMap extension" + e1);
-		} finally {
-			if(rs != null) try {rs.close(); } catch(Exception e) {}
-			if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-			if(conn != null) try { conn.close(); } catch(Exception e) {}
-		}
+		}	// end pgsql
 		
 		return false;
 	}
 
 	@Override
 	public Image getTableImage(String tableName) {
-		if(mapColumnDescList.containsKey(tableName)) {
-			return ResourceManager.getPluginImage(Activator.PLUGIN_ID, "resources/images/map-marker-16.png"); //$NON-NLS-1$
-		}
+		if(mapColumnDescList.containsKey(tableName)) return SpatialUtils.getMapMakerIcon();
 		return null;
 	}
 
@@ -94,9 +92,7 @@ public class ObjectViewerTableDecorator implements ITableDecorationExtension {
 	public Image getColumnImage(String tableName, String columnName) {
 		if(mapColumnDescList.containsKey(tableName)) {
 			List<String> listColumn = mapColumnDescList.get(tableName);
-			if(listColumn.contains(columnName)) {
-				return ResourceManager.getPluginImage(Activator.PLUGIN_ID, "resources/images/map-marker-16.png"); //$NON-NLS-1$
-			}
+			if(listColumn.contains(columnName)) return SpatialUtils.getMapMakerIcon();
 		}
 		return null;
 	}

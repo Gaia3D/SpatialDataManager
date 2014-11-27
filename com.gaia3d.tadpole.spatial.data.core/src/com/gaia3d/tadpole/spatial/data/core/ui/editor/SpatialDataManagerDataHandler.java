@@ -127,13 +127,17 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	
 	@Override
 	public void initExtension(UserDBDAO userDB) {
-		super.initExtension(userDB);
+		if(userDB == null) {
+			super.setEnableExtension(false);
+			return;
+		}
 		
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+		super.initExtension(userDB);		
+		if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			try {
 				conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery("SELECT * FROM geometry_columns");
@@ -155,18 +159,18 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 				}
 				
 				super.setEnableExtension(true);
-			} else {
-				super.setEnableExtension(false);	
+				
+			} catch (Exception e1) {
+				logger.error("GoogleMap extension" + e1);
+		
+				super.setEnableExtension(false);
+			} finally {
+				if(rs != null) try { rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
-			
-		} catch (Exception e1) {
-			logger.error("GoogleMap extension" + e1);
-	
+		} else {
 			super.setEnableExtension(false);
-		} finally {
-			if(rs != null) try {rs.close(); } catch(Exception e) {}
-			if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-			if(conn != null) try { conn.close(); } catch(Exception e) {}
 		}
 
 	}
@@ -199,58 +203,58 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-				conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery(strSQL);
+			conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(strSQL);
+			
+			Iterator<Map> iteMap = ResultSetUtils.getColumnTableColumnName(getEditorUserDB(), rs.getMetaData()).values().iterator();
+			int intIndex = 0;
+			while(iteMap.hasNext()) {
+				Map mapOriginal = (Map)iteMap.next();
 				
-				Iterator<Map> iteMap = ResultSetUtils.getColumnTableColumnName(getEditorUserDB(), rs.getMetaData()).values().iterator();
-				int intIndex = 0;
-				while(iteMap.hasNext()) {
-					Map mapOriginal = (Map)iteMap.next();
-					
-					String strSearchTable 	= (String)mapOriginal.get("table");
-					String strSearchColumn 	= (String)mapOriginal.get("column");
-					
-					if(mapGisColumnData.containsKey(strSearchTable)) {
-						List<String> listColumn = mapGisColumnData.get(strSearchTable);
-						
-						if(listColumn.contains(strSearchColumn)) {
-							addCostumeColumn.add(strSearchColumn);
-							listRealGisColumnIndex.add(intIndex);
-						}
-					}
-					intIndex++;
-				}	// end while
+				String strSearchTable 	= (String)mapOriginal.get("table");
+				String strSearchColumn 	= (String)mapOriginal.get("column");
 				
-				// geo 컬럼이 있는 것이다.
-				if(!addCostumeColumn.isEmpty()) {
+				if(mapGisColumnData.containsKey(strSearchTable)) {
+					List<String> listColumn = mapGisColumnData.get(strSearchTable);
 					
-					// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
-					mainEditor.getSashFormExtension().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							int []intWidgetSizes = mainEditor.getSashFormExtension().getWeights();
-							if(intWidgetSizes[0] != 100) {
-								mainEditor.getSashFormExtension().setWeights(new int[] {70, 30});
-							}
-						}
-					});
-					// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
-					
-					String strAddCustomeColumn = "";
-					for(int i=0; i<addCostumeColumn.size(); i++) {
-						String strColumn = addCostumeColumn.get(i);
-						
-						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn);
-						else strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
+					if(listColumn.contains(strSearchColumn)) {
+						addCostumeColumn.add(strSearchColumn);
+						listRealGisColumnIndex.add(intIndex);
 					}
-					
-					if(logger.isDebugEnabled()) {
-						logger.debug("Add Column is " + strAddCustomeColumn);
-						logger.debug("full SQL is " + String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL));
-					}
-					
-					return String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL);
 				}
+				intIndex++;
+			}	// end while
+			
+			// geo 컬럼이 있는 것이다.
+			if(!addCostumeColumn.isEmpty()) {
+				
+				// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
+				mainEditor.getSashFormExtension().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						int []intWidgetSizes = mainEditor.getSashFormExtension().getWeights();
+						if(intWidgetSizes[0] != 100) {
+							mainEditor.getSashFormExtension().setWeights(new int[] {70, 30});
+						}
+					}
+				});
+				// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
+				
+				String strAddCustomeColumn = "";
+				for(int i=0; i<addCostumeColumn.size(); i++) {
+					String strColumn = addCostumeColumn.get(i);
+					
+					if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn);
+					else strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
+				}
+				
+				if(logger.isDebugEnabled()) {
+					logger.debug("Add Column is " + strAddCustomeColumn);
+					logger.debug("full SQL is " + String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL));
+				}
+				
+				return String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL);
+			}
 			
 		} catch (Exception e1) {
 			logger.error("GoogleMap extension" + e1);

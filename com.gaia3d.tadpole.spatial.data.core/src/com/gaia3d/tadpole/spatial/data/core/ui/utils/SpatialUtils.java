@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler;
+package com.gaia3d.tadpole.spatial.data.core.ui.utils;
+
+import org.eclipse.swt.graphics.Image;
+
+import com.gaia3d.tadpole.spatial.data.core.Activator;
+import com.gaia3d.tadpole.spatial.data.core.ui.define.SpatialDefine;
+import com.swtdesigner.ResourceManager;
 
 /**
- * editor browser function 정의 
+ * utils
  * 
  * @author hangum
  *
  */
-public interface SpatialEditorFunction  {
+public class SpatialUtils {
+
 	/**
-	 * save option
+	 * map marker icon
+	 * 
+	 * @return
 	 */
-	public static final int SAVE_OPTIONS				= 5;
-    
-	/**
-	 * spatial browser browser handle name
-	 */
-    public static final String LEAFLET_SERVICE_HANDLER = "TadpoleBrowserHandler";
-    
+	public static Image getMapMakerIcon() {
+		return ResourceManager.getPluginImage(Activator.PLUGIN_ID, SpatialDefine.SPATIAL_ICON);
+	}
 }

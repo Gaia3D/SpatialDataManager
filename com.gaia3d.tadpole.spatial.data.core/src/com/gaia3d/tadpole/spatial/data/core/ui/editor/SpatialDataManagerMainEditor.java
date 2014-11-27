@@ -124,8 +124,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				listMapColumns.add(mapColumns);
 				
 				browserMap.evaluate(String.format(
-										"onClickPoint('%s');", 
-										TadpoleEditorUtils.getGrantText(makeGeoJSON(listMapColumns))
+										"onClickPoint('%s');", TadpoleEditorUtils.getGrantText(makeGeoJSON(listMapColumns))
 									)	// end String.format
 						);
 			}
@@ -151,6 +150,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	public void queryEndedExecute(final QueryExecuteResultDTO rsDAO) {
 		listGisColumnIndex.clear();
 		listNonGisColumnIndex.clear();
+		
 		this.rsDAO = rsDAO;
 		final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
 		final List<Map<Integer, Object>> resultData = rsDAO.getDataList().getData();
@@ -162,6 +162,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			if(StringUtils.startsWithIgnoreCase(strSearchColumn, PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN)) {
 				listGisColumnIndex.add(i);
 			} else if(!listRealGisColumnIndex.contains(i)) {
+				// -1은 사용자 ui를 구성하기 위해 순번 컬럼이 포함되는데 그것을 뺀것이다.
 				listNonGisColumnIndex.add(i-1);
 			}
 		}
@@ -176,8 +177,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		//
 		if(!listGisColumnIndex.isEmpty()) {
-			// ---------------------------------------------
-//			if(logger.isDebugEnabled()) logger.debug("## Total Size is ==> " + listGisColumnGjson.size());
 			Job job = new Job("Drawing map") {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {

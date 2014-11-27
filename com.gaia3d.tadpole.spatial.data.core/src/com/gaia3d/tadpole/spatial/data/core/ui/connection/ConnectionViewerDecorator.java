@@ -22,12 +22,11 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 
-import com.gaia3d.tadpole.spatial.data.core.Activator;
+import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.IConnectionDecoration;
 import com.hangum.tadpole.sql.dao.system.UserDBDAO;
-import com.swtdesigner.ResourceManager;
 
 /**
  * connection viewer decorator
@@ -40,24 +39,27 @@ public class ConnectionViewerDecorator implements IConnectionDecoration {
 	
 	@Override
 	public Image getImage(UserDBDAO userDB) {
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+		if(userDB == null) return null;
+		
+		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			try {
 				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery("SELECT * FROM geometry_columns");
 				
-				return ResourceManager.getPluginImage(Activator.PLUGIN_ID, "resources/images/map-marker-16.png"); //$NON-NLS-1$
+				return SpatialUtils.getMapMakerIcon();
+			} catch (Exception e1) {
+				logger.error("connection viewer decoration extension" + e1);
+			} finally {
+				if(rs != null) try {rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
-		} catch (Exception e1) {
-			logger.error("connection viewer decoration extension" + e1.getMessage());
-		} finally {
-			if(rs != null) try {rs.close(); } catch(Exception e) {}
-			if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-			if(conn != null) try { conn.close(); } catch(Exception e) {}
-		}
+		}	// end postgredb
 		
 		return null;
 	}

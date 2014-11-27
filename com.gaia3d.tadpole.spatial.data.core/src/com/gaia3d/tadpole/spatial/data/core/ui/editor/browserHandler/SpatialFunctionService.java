@@ -41,7 +41,7 @@ public class SpatialFunctionService extends BrowserFunction {
 	public Object function(Object[] arguments) {
 		
 		int intActionId =  NumberUtils.toInt(arguments[0].toString());
-		logger.debug("\t\t ==========>  SpatialFunctionService called" + arguments[0] +":" + arguments[1]);
+		if(logger.isDebugEnabled()) logger.debug("\t\t ==========>  SpatialFunctionService called" + arguments[0] +":" + arguments[1]);
 		
 		switch (intActionId) {
 			case SpatialEditorFunction.SAVE_OPTIONS:
@@ -56,7 +56,7 @@ public class SpatialFunctionService extends BrowserFunction {
 	}
 	
 	/**
-	 * help popup
+	 * save options
 	 */
 	protected void saveOptions(String userData) {
 		try {
