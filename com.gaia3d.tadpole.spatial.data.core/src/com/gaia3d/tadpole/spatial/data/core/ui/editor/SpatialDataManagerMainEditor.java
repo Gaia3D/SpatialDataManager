@@ -31,9 +31,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPreferenceData;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
-import com.hangum.tadpole.commons.util.JSONUtil;
 import com.hangum.tadpole.rdb.core.Activator;
-import com.hangum.tadpole.rdb.core.Messages;
 import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 
 /**
@@ -45,7 +43,6 @@ import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler {
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
-	/** 지도에 넘겨줄 카운트 */
 	/** 
 	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
 	 */
@@ -75,12 +72,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	
 	@Override
 	public void resultSetClick(final int selectIndex, final Map<Integer, Object> mapColumns) {
-//		if(logger.isDebugEnabled()) {
-//			logger.debug("=============================================================");
-//			logger.debug("Clieck column index is " + selectIndex );
-//			logger.debug("Clieck column data is " + mapColumns.get(selectIndex));
-//		}
-		
 		if(jobMouseClick != null) {
 			if(Job.RUNNING == jobMouseClick.getState()) {
 				if(logger.isDebugEnabled()) logger.debug("\t\t================= return already running query job ");
@@ -88,12 +79,11 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			}
 		}
 		
-		jobMouseClick = new Job(Messages.MainEditor_45) {
+		jobMouseClick = new Job("Spatial UserClick") {
 			@Override
 			public IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("click progress", IProgressMonitor.UNKNOWN);
+				monitor.beginTask("Click map data", IProgressMonitor.UNKNOWN);
 
-				/////////////////////////////////////////////////////////////////////////////////////////
 				browserMap.getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
@@ -102,7 +92,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 					}
 				});
 				
-				/////////////////////////////////////////////////////////////////////////////////////////
 				monitor.done();
 				return Status.OK_STATUS;
 			}
@@ -132,7 +121,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		};
 	
 		jobMouseClick.setPriority(Job.INTERACTIVE);
-		jobMouseClick.setName("Result clikc");
+		jobMouseClick.setName("Clikc map data");
 		jobMouseClick.schedule();
     }
 	
@@ -175,20 +164,19 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		/** 사용자 환경설정 */
 		final String USER_OPTIONS = SpatialGetPreferenceData.getUserOptions();
 		
-		//
 		if(!listGisColumnIndex.isEmpty()) {
 			Job job = new Job("Drawing map") {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
 					
-					final int intRowSize = resultData.toArray().length;
+					final int intRowSize = resultData.size();//toArray().length;
 					final int intTotalDrawMapCount = intRowSize/INT_SEND_COUNT+1;
 					monitor.beginTask("Drawing a map", intTotalDrawMapCount);
 					
 					try {
 						int intStartIndex = 0;
 						for(int i=0; i<intTotalDrawMapCount; i++) {
-							monitor.setTaskName("Drawing a map ( " + (i+1) + "/" + intTotalDrawMapCount + " )");
+							monitor.setTaskName(String.format("Drawing a map ( %s / %s )", (i+1), intTotalDrawMapCount));
 							monitor.worked(1);
 							
 							List<Map<Integer, Object>> listPartData = new ArrayList<>();
@@ -212,7 +200,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 							intStartIndex += INT_SEND_COUNT;
 						}	
 					} catch(Exception e) {
-						logger.error("Table Referesh", e);
+						logger.error("Drawing map rise exception.", e);
 						
 						return new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
 					} finally {
@@ -245,7 +233,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				 * 지도에 데이터를 표시합니다.
 				 * 
 				 * @param strGeoJson
-				 * @param strColor 결과를 더블 클릭했을 경우에 나타나는 색
 				 */
 				private void drawMapAddData(final List<Map<Integer, Object>> listGJson) {
 					browserMap.getDisplay().syncExec(new Runnable() {
@@ -260,9 +247,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				
 			};
 			
-			// job의 event를 처리해 줍니다.
 			job.addJobChangeListener(new JobChangeAdapter() {
-				
 				public void done(IJobChangeEvent event) {
 					browserMap.getDisplay().asyncExec(new Runnable() {
 						@Override
@@ -283,7 +268,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	}
 	
 	/**
-	 * 사용자가 클릭한 모든 layer를 삭제한다. 
+	 * 지도의 모든 layer를 삭제한다. 
 	 */
 	private void clearAllLayersMap() {
 		browserMap.evaluate("clearAllLayersMap();");
@@ -292,7 +277,8 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	/**
 	 * 데이터를 leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니다.
 	 * 
-	 * @param listPostGisJson
+	 * @param resultData
+	 * @param isAddOption 옵션을 만들것이지. 옵션의 내용은 지도 이외의 컬럼이다.
 	 * @return
 	 */
 	private String makeGeoJSON(final List<Map<Integer, Object>> resultData, boolean isAddOption) {
@@ -338,6 +324,5 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		
 		return String.format(TEMP_GEOJSON, tmpSBGeoJson.toString());
 	}
-	
 	
 }
