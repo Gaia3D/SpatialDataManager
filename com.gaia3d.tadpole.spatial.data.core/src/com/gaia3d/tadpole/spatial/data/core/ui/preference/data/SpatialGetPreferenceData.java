@@ -32,15 +32,40 @@ public class SpatialGetPreferenceData {
 	/** 지도를 그리기위해 데이터를 지도쪽에 데이터를 보내는 양. */
 	public static int getSendMapDataCount() {
 		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
-		if(userInfo == null) return Integer.parseInt(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT_VALUE);
+		if(userInfo == null) {
+			userInfo = new UserInfoDataDAO();
+			userInfo.setUser_seq(SessionManager.getSeq());
+			userInfo.setName(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
+			userInfo.setValue0(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT_VALUE);
+			insertData(userInfo);
+			
+			return Integer.parseInt(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT_VALUE);
+		}
 		return Integer.parseInt(userInfo.getValue0());
 	}
 	
 	/** 사용자가 지도를 클릭했을때 선택되는 색. */
 	public static String getUserOptions() {
 		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
-		if(userInfo == null) return SpatialPreferenceDefine.SPATIAL_USER_OPTIONS_VALUE;
+		if(userInfo == null) {
+			userInfo = new UserInfoDataDAO();
+			userInfo.setUser_seq(SessionManager.getSeq());
+			userInfo.setName(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
+			userInfo.setValue0(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS_VALUE);
+			insertData(userInfo);
+			
+			return SpatialPreferenceDefine.SPATIAL_USER_OPTIONS_VALUE;
+		}
 		return userInfo.getValue0();
+	}
+	
+	private static void insertData(UserInfoDataDAO userInfoData) {
+		try {
+			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(TadpoleSystemInitializer.getUserDB());
+			sqlClient.insert("userInfoDataInsert", userInfoData); //$NON-NLS-1$
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
