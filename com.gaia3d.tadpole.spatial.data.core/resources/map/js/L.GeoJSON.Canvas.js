@@ -107,7 +107,7 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	_drawPoint: function(canvasOverlay, ctx, coord) {
 		dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, this.options.SelectedPointRadius, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, this.options.BasePointRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();			
 	},

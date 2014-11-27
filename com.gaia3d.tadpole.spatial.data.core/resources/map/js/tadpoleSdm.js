@@ -22,7 +22,7 @@ options.canvasOptions =
 		BasePointRadius: 3,
 		BaseLineColor: 'rgba(0, 0, 255, 0.2)',
 		BaseLineWidth: 2,
-		BaseFillColor: 'rgba(0, 0, 255, 0.2)',
+		BaseFillColor: 'rgba(0, 0, 255, 0.2)'
 	};
 
 
