@@ -14,7 +14,7 @@ var layerTadpoleClick;
 
 var options = {
 		autoZoom: true,
-		displayType: "cluster"
+		displayType: "normal"
 }
 
 options.canvasOptions = 
