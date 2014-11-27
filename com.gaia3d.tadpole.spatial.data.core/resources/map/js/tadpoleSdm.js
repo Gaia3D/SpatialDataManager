@@ -177,7 +177,7 @@ function drawMapAddData(txtGeoJSON) {
 /**
 * click event
 */
-function onClickPoint(txtGeoJSON) {
+function onClickPoint(txtGeoJSON, txtToopTip) {
 	try {
 		/* console.log("==> geojsonFeature: \n" + geoJSON ); */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
@@ -188,6 +188,8 @@ function onClickPoint(txtGeoJSON) {
 		if (bounds.getSouthWest() == bounds.getNorthEast()) { // 점인 경우 약간 축소 처리
 			map.setZoom(map.getMaxZoom() - 2);
 		}
+		
+		if(txtToopTip != "") layerTadpoleClick.bindPopup(txtToopTip).openPopup();
 		
 		// !!! TEST CODE
 		saveOption();

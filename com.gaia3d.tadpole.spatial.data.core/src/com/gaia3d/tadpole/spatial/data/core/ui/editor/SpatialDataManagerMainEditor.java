@@ -54,13 +54,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 */
 	private static final String TEMP_GEOJSON_GEOMETRY = "{ \"type\": \"Feature\", \"geometry\": %s }";
 	
-	/**
-	 * sub properties.
-	 * TEMP_GEOJSON_GEOMETRY 안에 들어가야 합니다.
-	 */
-	private static final String TEMP_GEOJSON_PROPERTY = ", \"properties\":{%s}";
-	private static final String TEMP_GEOJSON_PROPERTY_VALUE = "\"%s\":\"%s\"";
-	
 	/** 결과 중에 geojson column index */
 	protected List<Integer> listGisColumnIndex = new ArrayList<>();
 
@@ -113,9 +106,28 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				listMapColumns.add(mapColumns);
 				
 				browserMap.evaluate(String.format(
-										"onClickPoint('%s');", TadpoleEditorUtils.getGrantText(makeGeoJSON(listMapColumns, true))
+										"onClickPoint('%s', '%s');", makeGeoJSON(listMapColumns), getTooltip()
 									)	// end String.format
 						);
+			}
+			
+			/**
+			 * tooltip Text
+			 * @return
+			 */
+			private String getTooltip() {
+				final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
+				StringBuffer sbPropertiValue = new StringBuffer();
+				for(int i=1; i<listNonGisColumnIndex.size(); i++) {
+					Integer index = listNonGisColumnIndex.get(i);
+					
+					if(listRealGisColumnIndex.contains(index)) continue;
+					String strProperty = String.format("<b>%s</b>: %s",  mapColumnNames.get(index+1), mapColumns.get(index+1));
+					if(i == (listNonGisColumnIndex.size()-1)) sbPropertiValue.append(strProperty);
+					else sbPropertiValue.append(strProperty).append("<br>");
+				}
+				
+				return TadpoleEditorUtils.getGrantText(sbPropertiValue.toString());
 			}
 
 		};
@@ -162,7 +174,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		/** 사용자 멤 데이터 */
 		final int INT_SEND_COUNT = SpatialGetPreferenceData.getSendMapDataCount();
 		/** 사용자 환경설정 */
-		final String USER_OPTIONS = SpatialGetPreferenceData.getUserOptions();
+		final String USER_OPTIONS = TadpoleEditorUtils.getGrantText(SpatialGetPreferenceData.getUserOptions());
 		
 		if(!listGisColumnIndex.isEmpty()) {
 			Job job = new Job("Drawing map") {
@@ -221,9 +233,9 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 					browserMap.getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
+							 
 							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", 
-																TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson, false)), 
-																TadpoleEditorUtils.getGrantText(strUserOptions))
+																makeGeoJSON(listGJson), strUserOptions)
 												);
 						}
 					});
@@ -239,7 +251,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						@Override
 						public void run() {
 							browserMap.evaluate(String.format("drawMapAddData('%s');", 
-													TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson, false)))
+													makeGeoJSON(listGJson))
 												);
 						}
 					});
@@ -278,35 +290,17 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 * 데이터를 leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니다.
 	 * 
 	 * @param resultData
-	 * @param isAddOption 옵션을 만들것이지. 옵션의 내용은 지도 이외의 컬럼이다.
 	 * @return
 	 */
-	private String makeGeoJSON(final List<Map<Integer, Object>> resultData, boolean isAddOption) {
+	private String makeGeoJSON(final List<Map<Integer, Object>> resultData) {
 		final List<String> listGisColumnGjson = new ArrayList<>();
-		StringBuffer sbPropertiValue = new StringBuffer();
 		
 		for(Object objResult : resultData.toArray()) {
 			final Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
-			final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
-			
-			if(isAddOption) {
-				sbPropertiValue.setLength(0);
-				for(int i=1; i<listNonGisColumnIndex.size(); i++) {
-					Integer index = listNonGisColumnIndex.get(i);
-					
-					if(listRealGisColumnIndex.contains(index)) continue;
-					
-					String strProperty = String.format(TEMP_GEOJSON_PROPERTY_VALUE,  mapColumnNames.get(index+1),   mapResult.get(index+1));
-					if(i == (listNonGisColumnIndex.size()-1)) sbPropertiValue.append(strProperty);
-					else sbPropertiValue.append(strProperty).append(",");
-				}
-			}
 			
 			// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
 			for(Integer index : listGisColumnIndex) {
-				String strGeometry = (String)mapResult.get(index);
-				if(sbPropertiValue.length() != 0) strGeometry += String.format(TEMP_GEOJSON_PROPERTY, sbPropertiValue.toString());
-				listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, strGeometry));
+				listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
 			} 
 		}
 		
@@ -317,12 +311,8 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			tmpSBGeoJson.append(geoJson);
 			if(i != (listGisColumnGjson.size()-1)) tmpSBGeoJson.append(", ");
 		}
-		
-//		if(logger.isDebugEnabled()) {
-//			logger.debug("[geojson is " + String.format(TEMP_GEOJSON, tmpSBGeoJson.toString()));
-//		}
-		
-		return String.format(TEMP_GEOJSON, tmpSBGeoJson.toString());
+			
+		return TadpoleEditorUtils.getGrantText(String.format(TEMP_GEOJSON, tmpSBGeoJson.toString()));
 	}
 	
 }
