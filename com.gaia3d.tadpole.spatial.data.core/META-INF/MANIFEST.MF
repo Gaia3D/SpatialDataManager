@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Spatial data core
+Bundle-Name: Spatial Data Manager
 Bundle-SymbolicName: com.gaia3d.tadpole.spatial.data.core;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.gaia3d.tadpole.spatial.data.core.Activator

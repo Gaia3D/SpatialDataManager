@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spatial Data Manger Test
+Bundle-SymbolicName: com.gaia3d.tadpole.spatial.data.core.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.gaia3d.tadpole.spatial.data.core.test.Activator
+Bundle-Vendor: gaia3d
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.rap.ui;bundle-version="2.3.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
