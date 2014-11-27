@@ -23,10 +23,26 @@ options.canvasOptions =
 		BaseLineColor: 'rgba(0, 0, 255, 0.2)',
 		BaseLineWidth: 2,
 		BaseFillColor: 'rgba(0, 0, 255, 0.2)',
-		SelectedPointRadius: 3,
-		SelectedLineColor: 'rgba(0, 0, 255, 0.2)',
-		SelectedLineWidth: 2,
-		SelectedFillColor: 'rgba(0, 0, 255, 0.2)'
+	};
+
+
+options.heatmapOptions = {
+		  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+		  // if scaleRadius is false it will be the constant radius used in pixels
+		  radius: 0.01,
+		  maxOpacity: .8, 
+		  // scales the radius based on map zoom
+		  scaleRadius: true, 
+		  // if set to false the heatmap uses the global maximum for colorization
+		  // if activated: uses the data maximum within the current map boundaries 
+		  //   (there will always be a red spot with useLocalExtremas true)
+		  useLocalExtrema: true
+		};
+
+options.selectedOptions = {
+	    color: "#ff7800", //txtColor,
+	    weight: 5,
+	    opacity: 0.65
 	};
 
 /**
@@ -34,27 +50,14 @@ options.canvasOptions =
  * 
  * @param options
  */
-function saveOption(options) {
+function saveOption() {
 	try {
-		TadpoleBrowserHandler(editorService.SAVE_OPTION, options);
+		TadpoleBrowserHandler(editorService.SAVE_OPTION, JSON.stringify(options));
+		console.log("==> options: \n" + JSON.stringify(options) );
     } catch(e) {
 		console.log(e);
 	}
 }
-
-options.heatmapOptions = {
-		  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-		  // if scaleRadius is false it will be the constant radius used in pixels
-		  "radius": 0.01,
-		  "maxOpacity": .8, 
-		  // scales the radius based on map zoom
-		  "scaleRadius": true, 
-		  // if set to false the heatmap uses the global maximum for colorization
-		  // if activated: uses the data maximum within the current map boundaries 
-		  //   (there will always be a red spot with useLocalExtremas true)
-		  "useLocalExtrema": true
-		};
-
 
 /*
  * initial event
@@ -91,20 +94,14 @@ function onLoad() {
 		break;
 	}
 	
-	
 	// sample data
 	if( typeof(sampleData) != 'undefined' ) {
 		layerTadpole.addData(sampleData);
 	}
 	
 	/* Clicked Object Layer */
-	var myStyle = {
-		    "color": "#ff7800", //txtColor,
-		    "weight": 5,
-		    "opacity": 0.65
-		};
 	layerTadpoleClick = L.geoJson(null,{
-		style: myStyle
+		style: options.selectedOptions
 	}).addTo(map);
 }
 
@@ -139,6 +136,13 @@ function clearClickedLayersMap() {
 * @param txtUserOption initialize user options
 */
 function drawingMapInit(txtGeoJSON, txtUserOption) {
+	try {
+		var newOptions = JSON.parse(txtUserOption);
+		options = newOptions;
+	} catch (err) {
+		console.log(err);
+	}
+	
 	try {
 		clearAllLayersMap();
 		
@@ -184,6 +188,9 @@ function onClickPoint(txtGeoJSON) {
 		if (bounds.getSouthWest() == bounds.getNorthEast()) { // 점인 경우 약간 축소 처리
 			map.setZoom(map.getMaxZoom() - 2);
 		}
+		
+		// !!! TEST CODE
+		saveOption();
 	} catch(err) {
 		console.log(err);
 	}
