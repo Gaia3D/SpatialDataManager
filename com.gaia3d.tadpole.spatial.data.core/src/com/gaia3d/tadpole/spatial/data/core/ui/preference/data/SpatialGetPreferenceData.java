@@ -70,7 +70,7 @@ public class SpatialGetPreferenceData {
 		userInfoData.setUser_seq(SessionManager.getSeq());
 		
 		// send map data count
-		userInfoData.setName(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
+		userInfoData.setName(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
 		userInfoData.setValue0(userData);
 		sqlClient.update("userInfoDataUpdate", userInfoData); //$NON-NLS-1$
 	}

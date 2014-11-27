@@ -28,5 +28,5 @@ public class SpatialPreferenceDefine {
 	public static final String SPATIAL_SEND_MAP_DATA_COUNT_VALUE = "1000";
 	
 	public static final String SPATIAL_USER_OPTIONS			= "SPATIAL_USER_OPTIONS";
-	public static final String SPATIAL_USER_OPTIONS_VALUE 	= "{autoZoom: true,BasePointRadius: 3,BaseLineColor: 'rgba(0, 0, 255, 0.2)',BaseLineWidth: 2,BaseFillColor: 'rgba(0, 0, 255, 0.2)',SelectedPointRadius: 3,SelectedLineColor: 'rgba(0, 0, 255, 0.2)',SelectedLineWidth: 2,SelectedFillColor: 'rgba(0, 0, 255, 0.2)'}";
+	public static final String SPATIAL_USER_OPTIONS_VALUE 	= "{'autoZoom':true,'displayType':'normal','canvasOptions':{'BasePointRadius':3,'BaseLineColor':'rgba(0, 0, 255, 0.2)','BaseLineWidth':2,'BaseFillColor':'rgba(0, 0, 255, 0.2)'},'heatmapOptions':{'radius':0.01,'maxOpacity':0.8,'scaleRadius':true,'useLocalExtrema':true},'selectedOptions':{'color':'#ff7800','weight':5,'opacity':0.65}}";
 }
