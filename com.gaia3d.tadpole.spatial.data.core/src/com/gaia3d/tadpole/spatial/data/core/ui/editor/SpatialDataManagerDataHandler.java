@@ -88,9 +88,6 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	/** browser.browserFunction의 서비스 헨들러 */
 	protected BrowserFunction editorService;
 	
-	/**
-	 * @wbp.parser.entryPoint
-	 */
 	@Override
 	public void createPartControl(Composite parent, MainEditor mainEditor) {
 		this.mainEditor = mainEditor;
@@ -257,7 +254,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 			}
 			
 		} catch (Exception e1) {
-			logger.error("GoogleMap extension" + e1);
+			logger.error("SpatialDataManager extension" + e1);
 	
 			super.setEnableExtension(false);
 		} finally {
