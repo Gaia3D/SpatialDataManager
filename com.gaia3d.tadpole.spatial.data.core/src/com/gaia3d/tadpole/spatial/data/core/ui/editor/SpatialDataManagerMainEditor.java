@@ -124,7 +124,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				listMapColumns.add(mapColumns);
 				
 				browserMap.evaluate(String.format(
-										"onClickPoint('%s');", TadpoleEditorUtils.getGrantText(makeGeoJSON(listMapColumns))
+										"onClickPoint('%s');", TadpoleEditorUtils.getGrantText(makeGeoJSON(listMapColumns, true))
 									)	// end String.format
 						);
 			}
@@ -234,7 +234,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						@Override
 						public void run() {
 							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", 
-																TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson)), 
+																TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson, false)), 
 																TadpoleEditorUtils.getGrantText(strUserOptions))
 												);
 						}
@@ -252,7 +252,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						@Override
 						public void run() {
 							browserMap.evaluate(String.format("drawMapAddData('%s');", 
-													TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson)))
+													TadpoleEditorUtils.getGrantText(makeGeoJSON(listGJson, false)))
 												);
 						}
 					});
@@ -295,7 +295,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 * @param listPostGisJson
 	 * @return
 	 */
-	private String makeGeoJSON(final List<Map<Integer, Object>> resultData) {
+	private String makeGeoJSON(final List<Map<Integer, Object>> resultData, boolean isAddOption) {
 		final List<String> listGisColumnGjson = new ArrayList<>();
 		StringBuffer sbPropertiValue = new StringBuffer();
 		
@@ -303,15 +303,17 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			final Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
 			final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
 			
-			sbPropertiValue.setLength(0);
-			for(int i=1; i<listNonGisColumnIndex.size(); i++) {
-				Integer index = listNonGisColumnIndex.get(i);
-				
-				if(listRealGisColumnIndex.contains(index)) continue;
-				
-				String strProperty = String.format(TEMP_GEOJSON_PROPERTY_VALUE,  mapColumnNames.get(index+1),   mapResult.get(index+1));
-				if(i == (listNonGisColumnIndex.size()-1)) sbPropertiValue.append(strProperty);
-				else sbPropertiValue.append(strProperty).append(",");
+			if(isAddOption) {
+				sbPropertiValue.setLength(0);
+				for(int i=1; i<listNonGisColumnIndex.size(); i++) {
+					Integer index = listNonGisColumnIndex.get(i);
+					
+					if(listRealGisColumnIndex.contains(index)) continue;
+					
+					String strProperty = String.format(TEMP_GEOJSON_PROPERTY_VALUE,  mapColumnNames.get(index+1),   mapResult.get(index+1));
+					if(i == (listNonGisColumnIndex.size()-1)) sbPropertiValue.append(strProperty);
+					else sbPropertiValue.append(strProperty).append(",");
+				}
 			}
 			
 			// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
@@ -326,15 +328,16 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		for(int i=0; i<listGisColumnGjson.size(); i++) {
 			String geoJson = listGisColumnGjson.get(i);
 			
-			tmpSBGeoJson.append(String.format(TEMP_GEOJSON_GEOMETRY, geoJson));
+			tmpSBGeoJson.append(geoJson);
 			if(i != (listGisColumnGjson.size()-1)) tmpSBGeoJson.append(", ");
 		}
 		
-		if(logger.isDebugEnabled()) {
-			logger.debug("[geojson is " + JSONUtil.getPretty(String.format(TEMP_GEOJSON, tmpSBGeoJson.toString())) );
-		}
+//		if(logger.isDebugEnabled()) {
+//			logger.debug("[geojson is " + String.format(TEMP_GEOJSON, tmpSBGeoJson.toString()));
+//		}
 		
 		return String.format(TEMP_GEOJSON, tmpSBGeoJson.toString());
 	}
+	
 	
 }
