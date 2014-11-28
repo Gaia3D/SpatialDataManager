@@ -98,5 +98,8 @@ public class SpatialGetPreferenceData {
 		userInfoData.setName(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
 		userInfoData.setValue0(userData);
 		sqlClient.update("userInfoDataUpdate", userInfoData); //$NON-NLS-1$
+		
+		// session 의 값도 수정해 줍니다. 
+		SessionManager.setUserInfo(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS, userData);
 	}
 }
