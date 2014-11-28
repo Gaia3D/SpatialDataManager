@@ -184,6 +184,7 @@ L.Control.SdmOption = L.Control.extend({
 
 			if (input.checked && !this._map.hasLayer(obj.layer)) {
 				this._map.addLayer(obj.layer);
+				options.displayType = obj.name;
 				resultLayer = obj.layer;
 				resultLayer.clearLayers();
 				saveOption();
