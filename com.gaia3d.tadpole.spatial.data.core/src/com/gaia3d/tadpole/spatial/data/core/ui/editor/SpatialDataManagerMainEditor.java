@@ -63,6 +63,9 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	/** mouse click job */
 	private Job jobMouseClick = null;
 	
+	/** 쿼리의 컬럼 정보 */
+	protected Map<Integer, String> mapColumnNames = null;
+	
 	@Override
 	public void resultSetClick(final int selectIndex, final Map<Integer, Object> mapColumns) {
 		if(jobMouseClick != null) {
@@ -116,7 +119,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			 * @return
 			 */
 			private String getTooltip() {
-				final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
+				
 				StringBuffer sbPropertiValue = new StringBuffer();
 				for(int i=1; i<listNonGisColumnIndex.size(); i++) {
 					Integer index = listNonGisColumnIndex.get(i);
@@ -152,8 +155,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 		listGisColumnIndex.clear();
 		listNonGisColumnIndex.clear();
 		
-		this.rsDAO = rsDAO;
-		final Map<Integer, String> mapColumnNames = rsDAO.getColumnName();
+		mapColumnNames = rsDAO.getColumnName();
 		final List<Map<Integer, Object>> resultData = rsDAO.getDataList().getData();
 
 		for(int i=0; i<mapColumnNames.size(); i++) {

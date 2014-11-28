@@ -65,9 +65,6 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 */
 	protected static final String GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
-	/** 쿼리 결과 셋 */
-	protected QueryExecuteResultDTO rsDAO = null;
-
 	/**
 	 * 쿼리 중에 리얼 gis 컬럼리스트이다.
 	 * 리얼은 쿼리를 조작하여 gis 컬럼을 넣는데, 이 컬럼은 빠져있다.
