@@ -84,7 +84,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 					@Override
 					public void run() {
 						clearClickedLayersMap();
-						drawingUserColorMap(mapColumns);
+						onSelecteddData(mapColumns);
 					}
 				});
 				
@@ -104,7 +104,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			 * 
 			 * @param strGeoJson
 			 */
-			private void drawingUserColorMap(final Map<Integer, Object> mapColumns) {
+			private void onSelecteddData(final Map<Integer, Object> mapColumns) {
 				List<Map<Integer, Object>> listMapColumns = new ArrayList<>();
 				listMapColumns.add(mapColumns);
 				

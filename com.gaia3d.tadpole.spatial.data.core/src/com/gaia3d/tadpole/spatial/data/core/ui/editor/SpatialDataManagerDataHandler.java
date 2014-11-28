@@ -40,7 +40,6 @@ import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.rdb.core.editors.main.MainEditor;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.AMainEditorExtension;
 import com.hangum.tadpole.sql.dao.system.UserDBDAO;
-import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.sql.util.resultset.ResultSetUtils;
 
 /**
