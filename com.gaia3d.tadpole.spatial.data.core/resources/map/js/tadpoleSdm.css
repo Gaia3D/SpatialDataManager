@@ -1,0 +1,53 @@
+/* sdmOption control */
+
+.leaflet-bar a,
+.leaflet-control-sdmOption-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-control-sdmOption {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-sdmOption-toggle {
+	background-image: url(images/menu.png);
+	width: 24px;
+	height: 24px;
+	}
+.leaflet-retina .leaflet-control-sdmOption-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-sdmOption-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-sdmOption .leaflet-control-sdmOption-list,
+.leaflet-control-sdmOption-expanded .leaflet-control-sdmOption-toggle {
+	display: none;
+	}
+.leaflet-control-sdmOption-expanded .leaflet-control-sdmOption-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-sdmOption-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-sdmOption-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-sdmOption label {
+	display: block;
+	}
+.leaflet-control-sdmOption-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+

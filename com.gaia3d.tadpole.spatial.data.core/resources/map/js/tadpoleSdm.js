@@ -9,8 +9,9 @@ var editorService = {
 $(document).ready(onLoad);
 
 var map;
-var layerTadpole;
-var layerTadpoleClick;
+var resultLayer;
+var normalLayer, heatmapLayer, clusterLayer;
+var selectedLayer;
 
 var options = {
 		autoZoom: true,
@@ -27,17 +28,17 @@ options.canvasOptions =
 
 
 options.heatmapOptions = {
-		  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-		  // if scaleRadius is false it will be the constant radius used in pixels
-		  radius: 0.01,
-		  maxOpacity: .8, 
-		  // scales the radius based on map zoom
-		  scaleRadius: true, 
-		  // if set to false the heatmap uses the global maximum for colorization
-		  // if activated: uses the data maximum within the current map boundaries 
-		  //   (there will always be a red spot with useLocalExtremas true)
-		  useLocalExtrema: true
-		};
+	  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+	  // if scaleRadius is false it will be the constant radius used in pixels
+	  radius: 0.01,
+	  maxOpacity: .8, 
+	  // scales the radius based on map zoom
+	  scaleRadius: true, 
+	  // if set to false the heatmap uses the global maximum for colorization
+	  // if activated: uses the data maximum within the current map boundaries 
+	  //   (there will always be a red spot with useLocalExtremas true)
+	  useLocalExtrema: true
+	};
 
 options.selectedOptions = {
 	    color: "#ff7800", //txtColor,
@@ -67,42 +68,52 @@ function onLoad() {
 	map = L.map('map').setView([37.55, 127.07], 3);
 
 	/* Base Layer */
-	L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+	baseLayer = L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		id: 'examples.map-20v6611k'
 	}).addTo(map);	
+	
+	normalLayer = L.geoJson.canvas(null, options.canvasOptions);
+	heatmapLayer = L.geoJson.heatmap(null, options.heatmapOptions);
+	clusterLayer = L.geoJson.cluster(null, null);
 
 	switch (options.displayType) {
 	case "normal":
 		/* Normal Layer */
-		layerTadpole = L.geoJson.canvas();
-		layerTadpole.setOptions(options.canvasOptions);
-		layerTadpole.addTo(map);
+		resultLayer = normalLayer.addTo(map);
 		break;
 	case "heatmap":
 		/* heatmap Layer */
-		layerTadpole = L.geoJson.heatmap(null, options.heatmapOptions);
-		layerTadpole.addTo(map);
+		resultLayer = heatmapLayer.addTo(map);
 		break;
 	case "cluster":
 		/* point cluster */
-		layerTadpole = L.geoJson.cluster(null, null);
-		layerTadpole.addTo(map);
+		resultLayer = clusterLayer.addTo(map);
 		break;
 	}
 	
 	// sample data
 	if( typeof(sampleData) != 'undefined' ) {
-		layerTadpole.addData(sampleData);
+		resultLayer.addData(sampleData);
 	}
 	
 	/* Clicked Object Layer */
-	layerTadpoleClick = L.geoJson(null,{
+	selectedLayer = L.geoJson(null,{
 		style: options.selectedOptions
 	}).addTo(map);
+	
+	var resultMaps = {
+	    "normal": normalLayer,
+	    "heatmap": heatmapLayer,
+	    "cluster": clusterLayer
+	};
+
+	var overlayMaps = null;
+	
+	L.control.sdmOption(resultMaps, options).addTo(map);
 }
 
 /*
@@ -110,8 +121,8 @@ function onLoad() {
 */
 function clearAllLayersMap() {
 	try {
-		layerTadpole.clearLayers();
-		layerTadpoleClick.clearLayers();
+		resultLayer.clearLayers();
+		selectedLayer.clearLayers();
 	} catch(err) {
 		console.log("Rise exception(clearAllLayersMap function) : " + err);
 	}
@@ -122,7 +133,7 @@ function clearAllLayersMap() {
 */
 function clearClickedLayersMap() {
 	try {
-		layerTadpoleClick.clearLayers();
+		selectedLayer.clearLayers();
 	} catch(err) {
 		console.log("Rise exception(cleareClickedLayersMap function) : " + err);
 	}
@@ -148,11 +159,11 @@ function drawingMapInit(txtGeoJSON, txtUserOption) {
 		
 		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpole.addData(geoJSON);
+		resultLayer.addData(geoJSON);
 		
 		/* zoom to data bounds */
 		if (options.autoZoom)
-			map.fitBounds(layerTadpole.getBounds());
+			map.fitBounds(resultLayer.getBounds());
 	} catch(err) {
 		console.log(err);
 	}
@@ -166,9 +177,9 @@ function drawingMapInit(txtGeoJSON, txtUserOption) {
 function drawMapAddData(txtGeoJSON) {
 	try {
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpole.addData(geoJSON);
+		resultLayer.addData(geoJSON);
 		if (options.autoZoom)
-			map.fitBounds(layerTadpole.getBounds());
+			map.fitBounds(resultLayer.getBounds());
 	} catch(err) {
 		console.log(err);
 	}
@@ -181,18 +192,14 @@ function onClickPoint(txtGeoJSON, txtToopTip) {
 	try {
 		/* console.log("==> geojsonFeature: \n" + geoJSON ); */
 		var geoJSON = jQuery.parseJSON(txtGeoJSON);
-		layerTadpoleClick.addData(geoJSON);
+		selectedLayer.addData(geoJSON);
 		bounds = L.geoJson(geoJSON).getBounds();
-//		bounds = layerTadpole._calcMbr(geoJSON.features[0].geometry.coordinates);
 		map.fitBounds(bounds);
 		if (bounds.getSouthWest() == bounds.getNorthEast()) { // 점인 경우 약간 축소 처리
 			map.setZoom(map.getMaxZoom() - 2);
 		}
 		
-		if(txtToopTip != "") layerTadpoleClick.bindPopup(txtToopTip).openPopup();
-		
-		// !!! TEST CODE
-		saveOption();
+		if(txtToopTip != "") selectedLayer.bindPopup(txtToopTip).openPopup();
 	} catch(err) {
 		console.log(err);
 	}
