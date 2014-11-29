@@ -25,6 +25,24 @@ L.Control.SdmOption = L.Control.extend({
 			this._addLayer(resultLayers[i], i);
 		}
 	},
+	
+	setOuterOptions: function(outerOption) {
+		this._outerOption = outerOption;
+	},
+	
+	setDisplayType: function(displayMode) {
+		objs = $(".leaflet-control-sdmOption-selector");
+		for (var i in objs) {
+			var obj = objs[i];
+			var objText = obj.labels[0].textContent.trim();
+			if (objText == displayMode) {
+				$(obj).attr("checked", true);
+			}
+			else {
+				$(obj).attr("checked", false);
+			}
+		}
+	},
 
 	onAdd: function (map) {
 		this._initLayout();
@@ -144,7 +162,11 @@ L.Control.SdmOption = L.Control.extend({
 	_addItem: function (obj) {
 		var label = document.createElement('label'),
 		    input,
-		    checked = this._map.hasLayer(obj.layer);
+		    checked;
+		
+		// 받은 옵션이 정상 동작 안함
+// 		checked = obj.name == this._outerOption.displayType;
+		checked = obj.name == options.displayType;
 
 		if (obj.overlay) {
 			input = document.createElement('input');

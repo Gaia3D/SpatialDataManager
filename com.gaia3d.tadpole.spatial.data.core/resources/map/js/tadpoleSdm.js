@@ -9,9 +9,10 @@ var editorService = {
 $(document).ready(onLoad);
 
 var map;
-var resultLayer;
+var resultLayer, resultMaps = [];
 var normalLayer, heatmapLayer, clusterLayer;
 var selectedLayer;
+var sdmOptionControl;
 
 var options = {
 		autoZoom: true,
@@ -76,24 +77,21 @@ function onLoad() {
 		id: 'examples.map-20v6611k'
 	}).addTo(map);	
 	
+	/* Normal Layer */
 	normalLayer = L.geoJson.canvas(null, options.canvasOptions);
-	heatmapLayer = L.geoJson.heatmap(null, options.heatmapOptions);
-	clusterLayer = L.geoJson.cluster(null, null);
+	resultMaps["normal"] = normalLayer;
 
-	switch (options.displayType) {
-	case "normal":
-		/* Normal Layer */
-		resultLayer = normalLayer.addTo(map);
-		break;
-	case "heatmap":
-		/* heatmap Layer */
-		resultLayer = heatmapLayer.addTo(map);
-		break;
-	case "cluster":
-		/* point cluster */
-		resultLayer = clusterLayer.addTo(map);
-		break;
-	}
+	/* heatmap Layer */
+	heatmapLayer = L.geoJson.heatmap(null, options.heatmapOptions);
+	resultMaps["heatmap"] = heatmapLayer;
+
+	/* point cluster */
+	clusterLayer = L.geoJson.cluster();
+	resultMaps["cluster"] = clusterLayer;
+
+	resultLayer = resultMaps[options.displayType];
+	if (!resultLayer) resultLayer = normalLayer;
+	resultLayer.addTo(map);
 	
 	// sample data
 	if( typeof(sampleData) != 'undefined' ) {
@@ -104,16 +102,9 @@ function onLoad() {
 	selectedLayer = L.geoJson(null,{
 		style: options.selectedOptions
 	}).addTo(map);
-	
-	var resultMaps = {
-	    "normal": normalLayer,
-	    "heatmap": heatmapLayer,
-	    "cluster": clusterLayer
-	};
 
-	var overlayMaps = null;
-	
-	L.control.sdmOption(resultMaps, options).addTo(map);
+	/* Option control */	
+	sdmOptionControl = L.control.sdmOption(resultMaps, options).addTo(map);
 }
 
 /*
@@ -150,15 +141,23 @@ function drawingMapInit(txtGeoJSON, txtUserOption) {
 	try {
 		var newOptions = JSON.parse(txtUserOption);
 		options = newOptions;
+		sdmOptionControl.setOuterOptions(options);
+		sdmOptionControl.setDisplayType(options.displayType);
 	} catch (err) {
 		console.log(err);
 	}
 	
 	try {
+		if (resultLayer)
+			map.removeLayer(resultLayer);
+		resultLayer = resultMaps[options.displayType];
+		if (!resultLayer)
+			resultLayer = normalLayer;
+		map.addLayer(resultLayer);
+		
 		clearAllLayersMap();
 		
-		/* http://stackoverflow.com/questions/25216165/put-a-geojson-on-a-leaflet-map-invalid-geojson-object-throw-new-errorinvalid */
-		var geoJSON = jQuery.parseJSON(txtGeoJSON);
+		var geoJSON = JSON.parse(txtGeoJSON);
 		resultLayer.addData(geoJSON);
 		
 		/* zoom to data bounds */
