@@ -52,7 +52,7 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 
 		var mbr = this._calcMbr(geojson.geometry.coordinates);
 		if (!this._bounds) 
-			this._bounds = mbr;
+			this._bounds = new L.LatLngBounds(mbr);
 		else {
 			this._bounds.extend(mbr.getSouthWest());
 			this._bounds.extend(mbr.getNorthEast());
@@ -94,8 +94,7 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 		var totBounds = this._calcMbr(coordinates[0]);
 		for (var i=1; i<coordinates.length; i++) {
 			var subBounds = this._calcMbr(coordinates[i]);
-			totBounds.extend(subBounds.min);
-			totBounds.extend(subBounds.max);
+			totBounds.extend(subBounds);
 		}
 		return totBounds;
 	},
@@ -105,7 +104,7 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	},
 	
 	_drawPoint: function(canvasOverlay, ctx, coord) {
-		dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
+		var dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, this.options.BasePointRadius, 0, Math.PI * 2);
         ctx.fill();
@@ -114,8 +113,8 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	_drawLineString: function(canvasOverlay, ctx, coordinates) {
         ctx.beginPath();
 		for (var i=0; i<coordinates.length; i++) {
-			coord = coordinates[i]
-			dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
+			var coord = coordinates[i]
+			var dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
 	        ctx[i==0?"moveTo":"lineTo"](dot.x, dot.y);
 		}
 		ctx.stroke();
@@ -123,15 +122,24 @@ L.GeoJSON.Canvas = L.CanvasOverlay.extend({
 	_drawPolygon: function(canvasOverlay, ctx, coordinates) {
         ctx.beginPath();
 		for (var iPoly=0; iPoly<coordinates.length; iPoly++) {
-			poly = coordinates[iPoly];
+			var poly = coordinates[iPoly];
 			for (var iRing=0; iRing<poly.length; iRing++) {
-				coord = poly[iRing];
-				dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
+				var coord = poly[iRing];
+				var dot = canvasOverlay._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
 		        ctx[iRing==0?"moveTo":"lineTo"](dot.x, dot.y);
 			}
 			ctx.closePath();
 		}
 		ctx.fill();
+		ctx.stroke();
+	},
+	_drawMbr: function(canvasOverlay, ctx, mbr) {
+		var coordinates = [mbr.getSouthWest(), mbr.getSouthEast(), mbr.getNorthEast(), mbr.getNorthWest(), mbr.getSouthWest()];
+        ctx.beginPath();
+		for (var i=0; i<coordinates.length; i++) {
+			var dot = canvasOverlay._map.latLngToContainerPoint(coordinates[i]);
+	        ctx[i==0?"moveTo":"lineTo"](dot.x, dot.y);
+		}
 		ctx.stroke();
 	},
 
