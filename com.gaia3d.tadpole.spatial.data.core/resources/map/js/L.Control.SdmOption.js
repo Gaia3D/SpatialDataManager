@@ -32,7 +32,7 @@ L.Control.SdmOption = L.Control.extend({
 	
 	setDisplayType: function(displayMode) {
 		objs = $(".leaflet-control-sdmOption-selector");
-		for (var i in objs) {
+		for (var i=0; i<objs.length; i++) {
 			var obj = objs[i];
 			var objText = obj.labels[0].textContent.trim();
 			if (objText == displayMode) {

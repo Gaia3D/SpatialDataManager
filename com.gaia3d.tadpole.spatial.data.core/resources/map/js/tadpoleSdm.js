@@ -16,7 +16,7 @@ var sdmOptionControl;
 
 var options = {
 		autoZoom: true,
-		displayType: "normal"
+		displayType: "cluster"
 }
 
 options.canvasOptions = 
@@ -55,7 +55,6 @@ options.selectedOptions = {
 function saveOption() {
 	try {
 		TadpoleBrowserHandler(editorService.SAVE_OPTION, JSON.stringify(options));
-		console.log("==> options: \n" + JSON.stringify(options) );
     } catch(e) {
 		console.log(e);
 	}

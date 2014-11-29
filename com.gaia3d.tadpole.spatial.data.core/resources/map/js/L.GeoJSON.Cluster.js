@@ -22,6 +22,7 @@ L.GeoJSON.Cluster = L.MarkerClusterGroup.extend({
 
 	clearLayers: function() {
 		L.MarkerClusterGroup.prototype.clearLayers();
+		//L.MarkerClusterGroup.prototype.initialize();
 		this._bounds = null;
 	},
 	
@@ -107,6 +108,11 @@ L.GeoJSON.Cluster = L.MarkerClusterGroup.extend({
 		return totBounds;
 	},
 	
+	addTo: function (map) {
+		map.addLayer(this);
+		L.MarkerClusterGroup.prototype.onAdd(map);
+		return this;
+	},
     getBounds : function() {
 		return this._bounds;
 	}
