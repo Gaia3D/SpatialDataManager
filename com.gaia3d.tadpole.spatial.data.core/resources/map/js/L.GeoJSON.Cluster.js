@@ -22,7 +22,8 @@ L.GeoJSON.Cluster = L.MarkerClusterGroup.extend({
 
 	clearLayers: function() {
 		L.MarkerClusterGroup.prototype.clearLayers();
-		//L.MarkerClusterGroup.prototype.initialize();
+		// for bug fix
+		this._generateInitialClusters();
 		this._bounds = null;
 	},
 	
@@ -57,11 +58,8 @@ L.GeoJSON.Cluster = L.MarkerClusterGroup.extend({
 		if (!this._bounds) 
 			this._bounds = mbr;
 		else {
-			this._bounds.extend(mbr.getSouthWest());
-			this._bounds.extend(mbr.getNorthEast());
+			this._bounds.extend(mbr);
 		}
-		
-	    geojson.geometry.mbr = mbr;
 		
 		return this;
 	},
@@ -110,6 +108,7 @@ L.GeoJSON.Cluster = L.MarkerClusterGroup.extend({
 	
 	addTo: function (map) {
 		map.addLayer(this);
+		// for bug fix
 		L.MarkerClusterGroup.prototype.onAdd(map);
 		return this;
 	},
