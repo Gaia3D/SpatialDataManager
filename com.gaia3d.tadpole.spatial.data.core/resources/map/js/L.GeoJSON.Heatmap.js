@@ -25,6 +25,7 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 	clearLayers: function() {
 		this._data = [];
 		this._bounds = null;
+		this._heatmap._renderer._clear();
 	},
 	
 	setOptions: function (options) {
