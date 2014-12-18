@@ -16,7 +16,7 @@ var sdmOptionControl;
 
 var options = {
 		autoZoom: true,
-		displayType: "cluster"
+		displayType: "heatmap"
 }
 
 options.canvasOptions = 

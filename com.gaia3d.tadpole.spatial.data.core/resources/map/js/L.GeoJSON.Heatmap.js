@@ -25,7 +25,8 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 	clearLayers: function() {
 		this._data = [];
 		this._bounds = null;
-		this._heatmap._renderer._clear();
+		if (this._heatmap && this._heatmap._renderer)
+			this._heatmap._renderer._clear();
 	},
 	
 	setOptions: function (options) {
@@ -66,11 +67,8 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		if (!this._bounds) 
 			this._bounds = mbr;
 		else {
-			this._bounds.extend(mbr.getSouthWest());
-			this._bounds.extend(mbr.getNorthEast());
+			this._bounds.extend(mbr);
 		}
-		
-	    geojson.geometry.mbr = mbr;
 		
 		return this;
 	},
@@ -110,8 +108,7 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 		var totBounds = this._registDataAndCalcMbr(coordinates[0]);
 		for (var i=1; i<coordinates.length; i++) {
 			var subBounds = this._registDataAndCalcMbr(coordinates[i]);
-			totBounds.extend(subBounds.min);
-			totBounds.extend(subBounds.max);
+			totBounds.extend(subBounds);
 		}
 		return totBounds;
 	},
@@ -119,10 +116,24 @@ L.GeoJSON.Heatmap = HeatmapOverlay.extend({
 	_update: function() {
 		    var bounds, zoom, scale;
 
-		    bounds = this._map.getBounds();
+		    // Padding for edge.
+		    bounds = this._map.getBounds().pad(0.01);
 		    zoom = this._map.getZoom();
 		    scale = Math.pow(2, zoom);
 
+		    
+		    
+		    var size = this._map.getSize();
+		    this._width = size.x;
+		    this._height = size.y;
+		    this._el.style.width = size.x + 'px';
+		    this._el.style.height = size.y + 'px';
+		    if (this._heatmap) {
+			    this._heatmap._renderer.canvas.width = size.x;
+			    this._heatmap._renderer.canvas.height = size.y;
+		    }
+		    
+		    
 		    if (this._data.length == 0) {
 		      return;
 		    }
