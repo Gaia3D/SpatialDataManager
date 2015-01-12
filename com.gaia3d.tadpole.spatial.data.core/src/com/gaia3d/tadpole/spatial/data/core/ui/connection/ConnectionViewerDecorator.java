@@ -59,6 +59,24 @@ public class ConnectionViewerDecorator implements IConnectionDecoration {
 				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
 				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
+		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			try {
+				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_CATALOG = '" + userDB.getDb() + "' AND DATA_TYPE like 'geo%'");
+				
+				return SpatialUtils.getMapMakerIcon();
+			} catch (Exception e1) {
+				logger.error("connection viewer decoration extension" + e1);
+			} finally {
+				if(rs != null) try {rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
+			}
 		}	// end postgredb
 		
 		return null;

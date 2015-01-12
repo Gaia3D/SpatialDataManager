@@ -16,10 +16,15 @@
 package com.gaia3d.tadpole.spatial.data.core.ui.utils;
 
 import org.eclipse.swt.graphics.Image;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 import com.gaia3d.tadpole.spatial.data.core.Activator;
 import com.gaia3d.tadpole.spatial.data.core.ui.define.SpatialDefine;
 import com.swtdesigner.ResourceManager;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * utils
@@ -36,5 +41,23 @@ public class SpatialUtils {
 	 */
 	public static Image getMapMakerIcon() {
 		return ResourceManager.getPluginImage(Activator.PLUGIN_ID, SpatialDefine.SPATIAL_ICON);
+	}
+	
+	/**
+	 * wkt to geojson
+	 * 
+	 * @param strWKT
+	 * @return
+	 * @throws Exception
+	 */
+	public static String wktToGeojson(String strWKT) throws ParseException {
+		GeometryFactory geoFactory = new GeometryFactory();
+		WKTReader wktReader = new WKTReader(geoFactory);
+		
+		Geometry geometry = wktReader.read(strWKT);
+		
+		GeoJSONWriter geojson = new GeoJSONWriter();
+		org.wololo.geojson.Geometry wololoGeojson = geojson.write(geometry);
+		return wololoGeojson.toString();
 	}
 }

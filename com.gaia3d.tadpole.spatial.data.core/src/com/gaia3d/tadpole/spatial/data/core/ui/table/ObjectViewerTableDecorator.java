@@ -77,7 +77,41 @@ public class ObjectViewerTableDecorator implements ITableDecorationExtension {
 				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
 				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
-		}	// end pgsql
+		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			try {
+				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_CATALOG = '" + userDB.getDb() + "' AND DATA_TYPE like 'geo%'");
+				
+				while(rs.next()) {
+					String tableName = rs.getString("table_schema") + "." + rs.getString("table_name");
+					
+					if(!mapColumnDescList.containsKey(tableName)) {
+						List<String> listColumns = new ArrayList();
+						listColumns.add(rs.getString("column_name"));
+						
+						mapColumnDescList.put(tableName, listColumns);
+					} else {
+						List<String> listColumns = mapColumnDescList.get(tableName);
+						listColumns.add(rs.getString("column_name"));
+						
+						mapColumnDescList.put(tableName, listColumns);
+					}
+				}
+					
+				return true;
+			} catch (Exception e1) {
+				logger.error("connection viewer decoration extension" + e1);
+			} finally {
+				if(rs != null) try {rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
+			}
+		}	// end postgredb
 		
 		return false;
 	}

@@ -58,11 +58,19 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 * 사용자 쿼리에 geometry 컬럼이 있을 경우에 사용하기 위한 전체 쿼리
 	 */
 	protected static final String GEOJSON_FULLY_SQL_FORMAT = "SELECT *, %s FROM (%s) as TADPOLESUB";
+	
 	/**
-	 * 컬럼을 st_AsGeoJson 으로 변환합니다.
+	 * POSTGIS 컬럼을 st_AsGeoJson 으로 변환합니다.
 	 * 참조: http://postgis.net/docs/ST_Transform.html
 	 */
-	protected static final String GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	protected static final String POSTGIS_GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	
+	/**
+	 * MSSQL 컬럼을 st_AsGeoJson 으로 변환합니다.
+	 * 참조: http://msdn.microsoft.com/en-us/magazine/dd434647.aspx
+	 * 		http://msdn.microsoft.com/en-us/library/bb933790.aspx
+	 */
+	protected static final String MSSQL_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s.STAsText() as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/**
 	 * 쿼리 중에 리얼 gis 컬럼리스트이다.
@@ -120,6 +128,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	
 	@Override
 	public void initExtension(UserDBDAO userDB) {
+		mapGisColumnData.clear();
 		if(userDB == null) {
 			super.setEnableExtension(false);
 			return;
@@ -154,7 +163,43 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 				super.setEnableExtension(true);
 				
 			} catch (Exception e1) {
-				logger.error("GoogleMap extension" + e1);
+				logger.error("GEO Postgis extension" + e1);
+		
+				super.setEnableExtension(false);
+			} finally {
+				if(rs != null) try { rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
+			}
+		} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT || getEditorUserDB().getDBDefine() == DBDefine.MSSQL_8_LE_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			try {
+				conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_CATALOG = '" + getEditorUserDB().getDb() + "' AND DATA_TYPE like 'geo%'");
+				
+				while(rs.next()) {
+					String tableName = rs.getString("table_schema") + "." + rs.getString("table_name");
+					
+					if(!mapGisColumnData.containsKey(tableName)) {
+						List<String> listColumns = new ArrayList();
+						listColumns.add(rs.getString("column_name"));
+						
+						mapGisColumnData.put(tableName, listColumns);
+					} else {
+						List<String> listColumns = mapGisColumnData.get(tableName);
+						listColumns.add(rs.getString("column_name"));
+						
+						mapGisColumnData.put(tableName, listColumns);
+					}
+				}
+				
+				super.setEnableExtension(true);
+				
+			} catch (Exception e1) {
+				logger.error("GEO MSSQL extension" + e1);
 		
 				super.setEnableExtension(false);
 			} finally {
@@ -174,7 +219,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	public void initUI() {
 		
 		try {
-			browserMap.setUrl("/resources/map/LeafletMap.html");
+			browserMap.setUrl("resources/map/LeafletMap.html");
 			registerBrowserFunctions();
 		} catch (Exception e) {
 			logger.error("initialize map initialize error", e);
@@ -236,9 +281,14 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 				String strAddCustomeColumn = "";
 				for(int i=0; i<addCostumeColumn.size(); i++) {
 					String strColumn = addCostumeColumn.get(i);
-					
-					if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn);
-					else strAddCustomeColumn += String.format(GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
+					if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(POSTGIS_GEOJSON_COLUMN_SQL, strColumn, strColumn);
+						else strAddCustomeColumn += String.format(POSTGIS_GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
+					} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_8_LE_DEFAULT || 
+							getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT) {
+						if(addCostumeColumn.size()-1 == i) strAddCustomeColumn += String.format(MSSQL_GEOJSON_COLUMN_SQL, strColumn, strColumn);
+						else strAddCustomeColumn += String.format(MSSQL_GEOJSON_COLUMN_SQL, strColumn, strColumn) + ", ";
+					}
 				}
 				
 				if(logger.isDebugEnabled()) {

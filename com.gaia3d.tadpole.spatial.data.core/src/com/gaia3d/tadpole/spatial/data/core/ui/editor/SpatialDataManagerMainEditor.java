@@ -29,10 +29,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPreferenceData;
+import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
+import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.rdb.core.Activator;
 import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
+import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Tadpole extension to spatial data manager 
@@ -302,7 +305,17 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			
 			// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
 			for(Integer index : listGisColumnIndex) {
-				listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
+				if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+//					logger.debug(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
+					listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
+				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT || getEditorUserDB().getDBDefine() == DBDefine.MSSQL_8_LE_DEFAULT) {
+					try {
+						String strGeoJson = String.format(TEMP_GEOJSON_GEOMETRY, SpatialUtils.wktToGeojson((String)mapResult.get(index)));
+						listGisColumnGjson.add(strGeoJson);
+					} catch (ParseException e) {
+						logger.error("WKT parse exception", e);
+					}
+				}
 			} 
 		}
 		
