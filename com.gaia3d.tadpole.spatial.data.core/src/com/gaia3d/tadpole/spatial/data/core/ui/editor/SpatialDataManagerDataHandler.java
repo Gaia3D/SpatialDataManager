@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -78,15 +77,6 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 */
 	protected List<Integer> listRealGisColumnIndex = new ArrayList<Integer>();
 
-	/** 
-	 * <pre>
-	 * 	geometry 테이블과 컬럼 정보를 가지고있습니다.
-	 * 
-	 * 	테이블명, 컬럼명
-	 * </pre> 
-	 */
-	protected Map<String, List<String>> mapGisColumnData = new HashMap<>();
-	
 	/** 지도가 들어갈 브라우저 */
 	protected Browser browserMap;
 	/** browser.browserFunction의 서비스 헨들러 */
@@ -128,89 +118,12 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	
 	@Override
 	public void initExtension(UserDBDAO userDB) {
-		mapGisColumnData.clear();
 		if(userDB == null) {
 			super.setEnableExtension(false);
 			return;
 		}
 		
 		super.initExtension(userDB);		
-		if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
-			Connection conn = null;
-			Statement stmt = null;
-			ResultSet rs = null;
-			try {
-				conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery("SELECT * FROM geometry_columns");
-				
-				while(rs.next()) {
-					String tableName = rs.getString("f_table_name");
-					
-					if(!mapGisColumnData.containsKey(tableName)) {
-						List<String> listColumns = new ArrayList();
-						listColumns.add(rs.getString("f_geometry_column"));
-						
-						mapGisColumnData.put(tableName, listColumns);
-					} else {
-						List<String> listColumns = mapGisColumnData.get(tableName);
-						listColumns.add(rs.getString("f_geometry_column"));
-						
-						mapGisColumnData.put(tableName, listColumns);
-					}
-				}
-				
-				super.setEnableExtension(true);
-				
-			} catch (Exception e1) {
-				logger.error("GEO Postgis extension" + e1);
-		
-				super.setEnableExtension(false);
-			} finally {
-				if(rs != null) try { rs.close(); } catch(Exception e) {}
-				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-				if(conn != null) try { conn.close(); } catch(Exception e) {}
-			}
-		} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT || getEditorUserDB().getDBDefine() == DBDefine.MSSQL_8_LE_DEFAULT) {
-			Connection conn = null;
-			Statement stmt = null;
-			ResultSet rs = null;
-			try {
-				conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_CATALOG = '" + getEditorUserDB().getDb() + "' AND DATA_TYPE like 'geo%'");
-				
-				while(rs.next()) {
-					String tableName = rs.getString("table_schema") + "." + rs.getString("table_name");
-					
-					if(!mapGisColumnData.containsKey(tableName)) {
-						List<String> listColumns = new ArrayList();
-						listColumns.add(rs.getString("column_name"));
-						
-						mapGisColumnData.put(tableName, listColumns);
-					} else {
-						List<String> listColumns = mapGisColumnData.get(tableName);
-						listColumns.add(rs.getString("column_name"));
-						
-						mapGisColumnData.put(tableName, listColumns);
-					}
-				}
-				
-				super.setEnableExtension(true);
-				
-			} catch (Exception e1) {
-				logger.error("GEO MSSQL extension" + e1);
-		
-				super.setEnableExtension(false);
-			} finally {
-				if(rs != null) try { rs.close(); } catch(Exception e) {}
-				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-				if(conn != null) try { conn.close(); } catch(Exception e) {}
-			}
-		} else {
-			super.setEnableExtension(false);
-		}
-
 	}
 	
 	/**
@@ -249,18 +162,27 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 			int intIndex = 0;
 			while(iteMap.hasNext()) {
 				Map mapOriginal = (Map)iteMap.next();
+				// 0 번째 컬럼은 순번 컬럼이므로 타입이 없다. 
+				if(mapOriginal.isEmpty()) continue;
 				
 				String strSearchTable 	= (String)mapOriginal.get("table");
 				String strSearchColumn 	= (String)mapOriginal.get("column");
+				String strSearchType 	= (String)mapOriginal.get("type");
+				String strSearchTypeName = (String)mapOriginal.get("typeName");
 				
-				if(mapGisColumnData.containsKey(strSearchTable)) {
-					List<String> listColumn = mapGisColumnData.get(strSearchTable);
-					
-					if(listColumn.contains(strSearchColumn)) {
-						addCostumeColumn.add(strSearchColumn);
-						listRealGisColumnIndex.add(intIndex);
-					}
+				if(logger.isDebugEnabled()) {
+					logger.debug("==> " + getEditorUserDB().getDBDefine());
+					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
 				}
+				
+				if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT & strSearchType.equals("1111")) {
+					addCostumeColumn.add(strSearchColumn);
+					listRealGisColumnIndex.add(intIndex);
+				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT & strSearchType.equals("2004")) {
+					addCostumeColumn.add(strSearchColumn);
+					listRealGisColumnIndex.add(intIndex);
+				}
+				
 				intIndex++;
 			}	// end while
 			
