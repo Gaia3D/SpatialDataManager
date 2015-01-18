@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.utils;
 
+import oracle.spatial.geometry.JGeometry;
+import oracle.spatial.util.WKT;
+import oracle.sql.STRUCT;
+
 import org.eclipse.swt.graphics.Image;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -59,5 +63,19 @@ public class SpatialUtils {
 		GeoJSONWriter geojson = new GeoJSONWriter();
 		org.wololo.geojson.Geometry wololoGeojson = geojson.write(geometry);
 		return wololoGeojson.toString();
+	}
+	
+	/**
+	 * oracle.sql.STRUCT to wkt
+	 * 
+	 * @param struct
+	 * @return
+	 * @throws Exception
+	 */
+	public static String oralceStructToWKT(oracle.sql.STRUCT struct) throws Exception {
+		JGeometry j_geom = JGeometry.load(struct);
+		
+		WKT wkt = new WKT();
+		return new String(wkt.fromJGeometry(j_geom));		
 	}
 }

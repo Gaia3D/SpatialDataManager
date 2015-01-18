@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import oracle.sql.STRUCT;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -306,13 +308,20 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 			// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
 			for(Integer index : listGisColumnIndex) {
 				if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
-//					logger.debug(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
 					listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
-				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT || getEditorUserDB().getDBDefine() == DBDefine.MSSQL_8_LE_DEFAULT) {
+				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT) {
 					try {
 						String strGeoJson = String.format(TEMP_GEOJSON_GEOMETRY, SpatialUtils.wktToGeojson((String)mapResult.get(index)));
 						listGisColumnGjson.add(strGeoJson);
 					} catch (ParseException e) {
+						logger.error("WKT parse exception", e);
+					}
+				} else if(getEditorUserDB().getDBDefine() == DBDefine.ORACLE_DEFAULT) {
+					try {
+						String strGeojson = SpatialUtils.wktToGeojson(SpatialUtils.oralceStructToWKT((oracle.sql.STRUCT)mapResult.get(index)));
+						String strGeoJson = String.format(TEMP_GEOJSON_GEOMETRY, strGeojson);
+						listGisColumnGjson.add(strGeoJson);
+					} catch (Exception e) {
 						logger.error("WKT parse exception", e);
 					}
 				}

@@ -77,7 +77,25 @@ public class ConnectionViewerDecorator implements IConnectionDecoration {
 				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
 				if(conn != null) try { conn.close(); } catch(Exception e) {}
 			}
-		}	// end postgredb
+		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT) {
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			try {
+				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery("select * from user_sdo_geom_metadata");
+				
+				return SpatialUtils.getMapMakerIcon();
+			} catch (Exception e1) {
+				logger.error("connection viewer decoration extension" + e1);
+			} finally {
+				if(rs != null) try {rs.close(); } catch(Exception e) {}
+				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
+				if(conn != null) try { conn.close(); } catch(Exception e) {}
+			}
+		}
 		
 		return null;
 	}
