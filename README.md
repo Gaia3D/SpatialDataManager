@@ -9,6 +9,10 @@ DBMS에 들어있는 공간데이터나 쿼리로 조회된 데이터를 시각�
 Spatial Data Manager는 [Tadpole DB Hub](https://github.com/hangum/TadpoleForDBTools/wiki)를 기반으로 하며, 
 지도 표시를 위해 [LeafletJS](http://leafletjs.com/)를 사용합니다.
 
+Download
+===============
+[Download link](http://sourceforge.net/projects/tadpoledbhub/files/v1.4.2/)
+
 License
 =======
 Spatial Data Manager는 [Apache License](http://en.wikipedia.org/wiki/Apache_License)를 따릅니다.
