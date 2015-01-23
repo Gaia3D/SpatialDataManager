@@ -59,23 +59,28 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	protected static final String GEOJSON_FULLY_SQL_FORMAT = "SELECT TADPOLESUB.*, %s FROM (%s) TADPOLESUB";
 	
 	/**
-	 * POSTGIS 컬럼을 st_AsGeoJson 으로 변환합니다.
+	 * POSTGIS 컬럼을 st_AsGeoJson 으로 변환합니다. (Postgres 9.3.5.2) 
+	 * 
 	 * 참조: http://postgis.net/docs/ST_Transform.html
 	 */
 	protected static final String POSTGIS_GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/**
-	 * MSSQL 컬럼을 WKT로 변환합니다.
+	 * MSSQL 컬럼을 WKT로 변환합니다. (MSSQL v2008)
+	 * 
 	 * 참조: http://msdn.microsoft.com/en-us/magazine/dd434647.aspx
 	 * 		http://msdn.microsoft.com/en-us/library/bb933790.aspx
 	 */
-	protected static final String MSSQL_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s.STAsText() as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	protected static final String MSSQL_GEOJSON_COLUMN_SQL = "geography::STGeomFromText(TADPOLESUB.%s.STAsText(), 4326).STAsText() as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/**
-	 * ORACLE 컬럼을 gis 로 처리하기 위해 작업합니다.
+	 * ORACLE 컬럼을 gis 로 처리하기 위해 작업합니다. (Oracle 11g)
+	 * 
 	 * 참조: http://docs.oracle.com/cd/B12037_01/appdev.101/b10826/sdo_objrelschema.htm
 	 *		https://docs.oracle.com/cd/B19306_01/appdev.102/b14255/toc.htm
+	 *		sample database : http://www.oracle.com/technetwork/middleware/mapviewer/downloads/navteq-data-download-168399.html
 	 */
+//	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "SDO_CS.TRANSFORM(TADPOLESUB.%s, 4326) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/**

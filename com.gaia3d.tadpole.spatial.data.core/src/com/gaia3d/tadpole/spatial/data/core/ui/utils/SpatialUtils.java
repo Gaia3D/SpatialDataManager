@@ -17,7 +17,6 @@ package com.gaia3d.tadpole.spatial.data.core.ui.utils;
 
 import oracle.spatial.geometry.JGeometry;
 import oracle.spatial.util.WKT;
-import oracle.sql.STRUCT;
 
 import org.eclipse.swt.graphics.Image;
 import org.wololo.jts2geojson.GeoJSONWriter;
