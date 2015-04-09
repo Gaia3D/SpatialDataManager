@@ -76,12 +76,14 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	/**
 	 * ORACLE 컬럼을 gis 로 처리하기 위해 작업합니다. (Oracle 11g)
 	 * 
-	 * 참조: http://docs.oracle.com/cd/B12037_01/appdev.101/b10826/sdo_objrelschema.htm
+	 * 
+	 * 참조: SDO_CS Package (Coordinate System Transformation) : http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_cs_ref.htm#SPATL140
+	 * 		http://docs.oracle.com/cd/B12037_01/appdev.101/b10826/sdo_objrelschema.htm
 	 *		https://docs.oracle.com/cd/B19306_01/appdev.102/b14255/toc.htm
 	 *		sample database : http://www.oracle.com/technetwork/middleware/mapviewer/downloads/navteq-data-download-168399.html
 	 */
-//	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "SDO_CS.TRANSFORM(TADPOLESUB.%s, 4326) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
-	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "SDO_CS.TRANSFORM(TADPOLESUB.%s, 4326) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+//	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/**
 	 * 쿼리 중에 리얼 gis 컬럼리스트이다.
