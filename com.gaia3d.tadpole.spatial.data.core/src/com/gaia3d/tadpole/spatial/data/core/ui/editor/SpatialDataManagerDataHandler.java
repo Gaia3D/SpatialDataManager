@@ -36,10 +36,10 @@ import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialFunc
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
+import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
+import com.hangum.tadpole.engine.sql.util.resultset.ResultSetUtils;
 import com.hangum.tadpole.rdb.core.editors.main.MainEditor;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.AMainEditorExtension;
-import com.hangum.tadpole.sql.dao.system.UserDBDAO;
-import com.hangum.tadpole.sql.util.resultset.ResultSetUtils;
 
 /**
  * 올챙이 지도를 확장하기 위해서 

@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.preference.data;
 
+import com.hangum.tadpole.engine.initialize.TadpoleSystemInitializer;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
+import com.hangum.tadpole.engine.query.dao.system.UserInfoDataDAO;
 import com.hangum.tadpole.session.manager.SessionManager;
-import com.hangum.tadpole.sql.dao.system.UserInfoDataDAO;
-import com.hangum.tadpole.sql.query.TadpoleSystemInitializer;
 import com.ibatis.sqlmap.client.SqlMapClient;
 
 /**
@@ -34,7 +34,7 @@ public class SpatialGetPreferenceData {
 		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
 		if(userInfo == null) {
 			userInfo = new UserInfoDataDAO();
-			userInfo.setUser_seq(SessionManager.getSeq());
+			userInfo.setUser_seq(SessionManager.getUserSeq());
 			userInfo.setName(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
 			userInfo.setValue0(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT_VALUE);
 			insertData(userInfo);
@@ -49,7 +49,7 @@ public class SpatialGetPreferenceData {
 		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
 		if(userInfo == null) {
 			userInfo = new UserInfoDataDAO();
-			userInfo.setUser_seq(SessionManager.getSeq());
+			userInfo.setUser_seq(SessionManager.getUserSeq());
 			userInfo.setName(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
 			userInfo.setValue0(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS_VALUE);
 			insertData(userInfo);
@@ -76,7 +76,7 @@ public class SpatialGetPreferenceData {
 	public static void updateSendMapDataCount(String sendMapDataCount) throws Exception {
 		SqlMapClient sqlClient = TadpoleSQLManager.getInstance(TadpoleSystemInitializer.getUserDB());
 		UserInfoDataDAO userInfoData = new UserInfoDataDAO();
-		userInfoData.setUser_seq(SessionManager.getSeq());
+		userInfoData.setUser_seq(SessionManager.getUserSeq());
 		
 		// send map data count
 		userInfoData.setName(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
@@ -92,7 +92,7 @@ public class SpatialGetPreferenceData {
 	public static void updateUserOptions(String userData) throws Exception {
 		SqlMapClient sqlClient = TadpoleSQLManager.getInstance(TadpoleSystemInitializer.getUserDB());
 		UserInfoDataDAO userInfoData = new UserInfoDataDAO();
-		userInfoData.setUser_seq(SessionManager.getSeq());
+		userInfoData.setUser_seq(SessionManager.getUserSeq());
 		
 		// send map data count
 		userInfoData.setName(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);

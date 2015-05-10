@@ -33,8 +33,8 @@ import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
+import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.rdb.core.Activator;
-import com.hangum.tadpole.sql.util.resultset.QueryExecuteResultDTO;
 import com.vividsolutions.jts.io.ParseException;
 
 /**

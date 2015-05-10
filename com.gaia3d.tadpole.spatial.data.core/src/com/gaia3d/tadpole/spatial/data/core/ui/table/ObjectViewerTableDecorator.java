@@ -27,8 +27,8 @@ import org.eclipse.swt.graphics.Image;
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
+import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.ITableDecorationExtension;
-import com.hangum.tadpole.sql.dao.system.UserDBDAO;
 
 
 /**
