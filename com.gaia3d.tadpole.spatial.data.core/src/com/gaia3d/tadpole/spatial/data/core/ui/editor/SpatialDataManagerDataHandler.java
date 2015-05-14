@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialEditorFunction;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialFunctionService;
 import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
+import com.hangum.tadpold.commons.libs.core.define.SystemDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
@@ -151,10 +152,10 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	/**
 	 * UI가 처음 호출될때 초기화 합니다.
 	 */
+	public static final String DUMY_DATA = String.format("?%s=%s", SystemDefine.MAJOR_VERSION, SystemDefine.RELEASE_DATE);
 	public void initUI() {
-		
 		try {
-			browserMap.setUrl("resources/map/LeafletMap.html");
+			browserMap.setUrl("resources/map/LeafletMap.html" + DUMY_DATA);
 			registerBrowserFunctions();
 		} catch (Exception e) {
 			logger.error("initialize map initialize error", e);
