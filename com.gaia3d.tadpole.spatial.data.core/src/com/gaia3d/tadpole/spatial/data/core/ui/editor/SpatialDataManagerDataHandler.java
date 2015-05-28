@@ -15,13 +15,8 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.editor;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
@@ -31,14 +26,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao.RequestSpatialQueryDAO;
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialEditorFunction;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialFunctionService;
-import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpold.commons.libs.core.define.SystemDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
-import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
-import com.hangum.tadpole.engine.sql.util.resultset.ResultSetUtils;
 import com.hangum.tadpole.rdb.core.editors.main.MainEditor;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.AMainEditorExtension;
 
@@ -57,34 +52,7 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	/**
 	 * 사용자 쿼리에 geometry 컬럼이 있을 경우에 사용하기 위한 전체 쿼리
 	 */
-	protected static final String GEOJSON_FULLY_SQL_FORMAT = "SELECT TADPOLESUB.*, %s FROM (%s) TADPOLESUB";
-	
-	/**
-	 * POSTGIS 컬럼을 st_AsGeoJson 으로 변환합니다. (Postgres 9.3.5.2) 
-	 * 
-	 * 참조: http://postgis.net/docs/ST_Transform.html
-	 */
-	protected static final String POSTGIS_GEOJSON_COLUMN_SQL = "st_AsGeoJson(st_transform(TADPOLESUB.%s, 4326)) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
-	
-	/**
-	 * MSSQL 컬럼을 WKT로 변환합니다. (MSSQL v2008)
-	 * 
-	 * 참조: http://msdn.microsoft.com/en-us/magazine/dd434647.aspx
-	 * 		http://msdn.microsoft.com/en-us/library/bb933790.aspx
-	 */
-	protected static final String MSSQL_GEOJSON_COLUMN_SQL = "geography::STGeomFromText(TADPOLESUB.%s.STAsText(), 4326).STAsText() as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
-	
-	/**
-	 * ORACLE 컬럼을 gis 로 처리하기 위해 작업합니다. (Oracle 11g)
-	 * 
-	 * 
-	 * 참조: SDO_CS Package (Coordinate System Transformation) : http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_cs_ref.htm#SPATL140
-	 * 		http://docs.oracle.com/cd/B12037_01/appdev.101/b10826/sdo_objrelschema.htm
-	 *		https://docs.oracle.com/cd/B19306_01/appdev.102/b14255/toc.htm
-	 *		sample database : http://www.oracle.com/technetwork/middleware/mapviewer/downloads/navteq-data-download-168399.html
-	 */
-	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "SDO_CS.TRANSFORM(TADPOLESUB.%s, 4326) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
-//	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "TADPOLESUB.%s as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	public static final String GEOJSON_FULLY_SQL_FORMAT = "SELECT TADPOLESUB.*, %s FROM (%s) TADPOLESUB";
 	
 	/**
 	 * 쿼리 중에 리얼 gis 컬럼리스트이다.
@@ -170,49 +138,20 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 	 */
 	@Override
 	public String sqlCostume(String strSQL) {
-		List<String> addCostumeColumn = new ArrayList<String>();
-		listRealGisColumnIndex.clear();
 		
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+		SpatiaDBFactory factory = new SpatiaDBFactory();
+		SpatialDB spatialDB = factory.getSpatialDB(getEditorUserDB());
+		
+		RequestSpatialQueryDAO dao = new RequestSpatialQueryDAO(strSQL); 
 		try {
-			conn = TadpoleSQLManager.getInstance(getEditorUserDB()).getDataSource().getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(strSQL);
-			
-			Iterator<Map> iteMap = ResultSetUtils.getColumnTableColumnName(getEditorUserDB(), rs.getMetaData()).values().iterator();
-			int intIndex = 0;
-			while(iteMap.hasNext()) {
-				Map mapOriginal = (Map)iteMap.next();
-				// 0 번째 컬럼은 순번 컬럼이므로 타입이 없다. 
-				if(mapOriginal.isEmpty()) continue;
-				
-				String strSearchTable 	= (String)mapOriginal.get("table");
-				String strSearchColumn 	= (String)mapOriginal.get("column");
-				String strSearchType 	= (String)mapOriginal.get("type");
-				String strSearchTypeName = (String)mapOriginal.get("typeName");
-				
-				if(logger.isDebugEnabled()) {
-					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
-				}
-				
-				if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT & strSearchType.equals("1111")) {
-					addCostumeColumn.add(strSearchColumn);
-					listRealGisColumnIndex.add(intIndex);
-				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT & strSearchType.equals("2004")) {
-					addCostumeColumn.add(strSearchColumn);
-					listRealGisColumnIndex.add(intIndex);
-				} else if(getEditorUserDB().getDBDefine() == DBDefine.ORACLE_DEFAULT & strSearchType.equals("2002")) {
-					addCostumeColumn.add(strSearchColumn);
-					listRealGisColumnIndex.add(intIndex);
-				}
-				
-				intIndex++;
-			}	// end while
-			
-			// geo 컬럼이 있는 것이다.
-			if(!addCostumeColumn.isEmpty()) {
+			spatialDB.makeSpatialQuery(dao);
+		
+			listRealGisColumnIndex = dao.getListRealGisColumnIndex();
+			if(listRealGisColumnIndex.isEmpty()) {
+				super.setEnableExtension(false);
+				return dao.getOrigianlQuery();
+			} else {
+				super.setEnableExtension(true);
 				
 				// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
 				mainEditor.getSashFormExtension().getDisplay().asyncExec(new Runnable() {
@@ -223,41 +162,13 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 						}
 					}
 				});
-				// 컬럼이 있다면 mainEditor의 화면중에, 지도 부분의 영역을 30%만큼 조절합니다.
 				
-				String strAddCustomeColumn = "";
-				for(int i=0; i<addCostumeColumn.size(); i++) {
-					String strColumn = addCostumeColumn.get(i);
-					if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
-						strAddCustomeColumn += String.format(POSTGIS_GEOJSON_COLUMN_SQL, strColumn, strColumn);
-						if(addCostumeColumn.size()-1 != i) strAddCustomeColumn += ", ";
-					} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT) {
-						strAddCustomeColumn += String.format(MSSQL_GEOJSON_COLUMN_SQL, strColumn, strColumn);
-						if(addCostumeColumn.size()-1 != i) strAddCustomeColumn += ", ";
-					} else if(getEditorUserDB().getDBDefine() == DBDefine.ORACLE_DEFAULT) {
-						strAddCustomeColumn += String.format(ORACLE_GEOJSON_COLUMN_SQL, strColumn, strColumn);
-						if(addCostumeColumn.size()-1 != i) strAddCustomeColumn += ", ";
-					}
-				}
-				
-				if(logger.isDebugEnabled()) {
-					logger.debug("Add Column is " + strAddCustomeColumn);
-					logger.debug("full SQL is " + String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL));
-				}
-				
-				return String.format(GEOJSON_FULLY_SQL_FORMAT, strAddCustomeColumn, strSQL);
+				return dao.getTadpoleFullyQuery();
 			}
-			
-		} catch (Exception e1) {
-			logger.error("SpatialDataManager extension" + e1);
-	
+		} catch(Exception e) {
 			super.setEnableExtension(false);
-		} finally {
-			if(rs != null) try {rs.close(); } catch(Exception e) {}
-			if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-			if(conn != null) try { conn.close(); } catch(Exception e) {}
 		}
-
+		
 		return strSQL;
 	}
 	

@@ -15,18 +15,14 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.table;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
-import com.hangum.tadpole.engine.define.DBDefine;
-import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.rdb.core.extensionpoint.definition.ITableDecorationExtension;
 
@@ -44,110 +40,15 @@ public class ObjectViewerTableDecorator implements ITableDecorationExtension {
 	public boolean initExtension(UserDBDAO userDB) {
 		if(userDB == null) return false;
 		
-		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
-			Connection conn = null;
-			Statement stmt = null;
-			ResultSet rs = null;
-			
-			try {
-				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery("SELECT * FROM geometry_columns");
-				while(rs.next()) {
-					String tableName = rs.getString("f_table_name");
-					
-					if(!mapColumnDescList.containsKey(tableName)) {
-						List<String> listColumns = new ArrayList();
-						listColumns.add(rs.getString("f_geometry_column"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					} else {
-						List<String> listColumns = mapColumnDescList.get(tableName);
-						listColumns.add(rs.getString("f_geometry_column"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					}
-				}
-					
-				return true;
-			} catch (Exception e1) {
-				logger.error("GoogleMap extension" + e1);
-			} finally {
-				if(rs != null) try {rs.close(); } catch(Exception e) {}
-				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-				if(conn != null) try { conn.close(); } catch(Exception e) {}
-			}
-		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT) {
-			Connection conn = null;
-			Statement stmt = null;
-			ResultSet rs = null;
-			
-			try {
-				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_CATALOG = '" + userDB.getDb() + "' AND DATA_TYPE like 'geo%'");
-				
-				while(rs.next()) {
-					String tableName = rs.getString("table_schema") + "." + rs.getString("table_name");
-					
-					if(!mapColumnDescList.containsKey(tableName)) {
-						List<String> listColumns = new ArrayList();
-						listColumns.add(rs.getString("column_name"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					} else {
-						List<String> listColumns = mapColumnDescList.get(tableName);
-						listColumns.add(rs.getString("column_name"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					}
-				}
-					
-				return true;
-			} catch (Exception e1) {
-				logger.error("connection viewer decoration extension" + e1);
-			} finally {
-				if(rs != null) try {rs.close(); } catch(Exception e) {}
-				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-				if(conn != null) try { conn.close(); } catch(Exception e) {}
-			}
-		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT) {
-			Connection conn = null;
-			Statement stmt = null;
-			ResultSet rs = null;
-			
-			try {
-				conn = TadpoleSQLManager.getInstance(userDB).getDataSource().getConnection();
-				stmt = conn.createStatement();
-				rs = stmt.executeQuery("select * from user_sdo_geom_metadata");
-				
-				while(rs.next()) {
-					String tableName = rs.getString("table_name");
-					
-					if(!mapColumnDescList.containsKey(tableName)) {
-						List<String> listColumns = new ArrayList();
-						listColumns.add(rs.getString("column_name"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					} else {
-						List<String> listColumns = mapColumnDescList.get(tableName);
-						listColumns.add(rs.getString("column_name"));
-						
-						mapColumnDescList.put(tableName, listColumns);
-					}
-				}
-					
-				return true;
-			} catch (Exception e1) {
-				logger.error("connection viewer decoration extension" + e1);
-			} finally {
-				if(rs != null) try {rs.close(); } catch(Exception e) {}
-				if(stmt != null) try { stmt.close(); } catch(Exception e) {}
-				if(conn != null) try { conn.close(); } catch(Exception e) {}
-			}
-		}
+		mapColumnDescList.clear();
 		
-		return false;
+		SpatiaDBFactory factory = new SpatiaDBFactory();
+		SpatialDB spatialDB = factory.getSpatialDB(userDB);
+		if(spatialDB == null) return false;
+		
+		mapColumnDescList.putAll( spatialDB.getSpatialTableColumn() );
+		if(mapColumnDescList.isEmpty()) return false;
+		else return true;
 	}
 
 	@Override

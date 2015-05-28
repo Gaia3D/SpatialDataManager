@@ -73,7 +73,6 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	public void resultSetClick(final int selectIndex, final Map<Integer, Object> mapColumns) {
 		if(jobMouseClick != null) {
 			if(Job.RUNNING == jobMouseClick.getState()) {
-				if(logger.isDebugEnabled()) logger.debug("\t\t================= return already running query job ");
 				return;
 			}
 		}
