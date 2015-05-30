@@ -11,7 +11,7 @@ Spatial Data Manager는 [Tadpole DB Hub](https://github.com/hangum/TadpoleForDBT
 
 Download
 ===============
-[Click me](http://sourceforge.net/projects/tadpoledbhub/files/v1.4.2/)
+[Click me](https://sourceforge.net/projects/tadpolesdm/files/1.6.x/1.6.1/)
 
 License
 =======

@@ -94,13 +94,11 @@ public class MSSQLSpatialDBTest {
 		Map<String, List<String>> mapSpatialTableColumn = spatialDB.getSpatialTableColumn();
 		if(mapSpatialTableColumn.isEmpty()) fail("Do not support spaatial database");
 		
-		boolean isRiseError = false;
 		Set<String> tableColumn = mapSpatialTableColumn.keySet();
 		for (String strTable : tableColumn) {
 			List<String> listSpatialColumn = mapSpatialTableColumn.get(strTable);
 			
 			if(listSpatialColumn.isEmpty()) {
-				isRiseError = true;
 				fail(strTable + " is not found spatial columns.");
 			}
 		}
