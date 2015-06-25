@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.rap.ui;bundle-version="2.3.1",
  com.hangum.tadpole.commons.utils;bundle-version="2.0.0",
  com.hangum.tadpole.ace.editor.core;bundle-version="1.0.0",
  org.eclipse.equinox.http.registry;bundle-version="1.1.300",
- com.hangum.tadpole.preference;bundle-version="2.0.0"
+ com.hangum.tadpole.preference;bundle-version="2.0.0",
+ org.eclipse.rap.fileupload;bundle-version="3.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
@@ -28,3 +29,5 @@ Bundle-ClassPath: .,
 Export-Package: com.gaia3d.tadpole.spatial.data.core.spaitaldb,
  com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao,
  com.gaia3d.tadpole.spatial.data.core.spaitaldb.db
+Import-Package: javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0"

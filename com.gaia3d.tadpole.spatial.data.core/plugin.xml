@@ -34,5 +34,20 @@
             name="Spatial Data Manager">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="com.gaia3d.tadpole.spatial.data.core.objectContribution.shape"
+            objectClass="com.hangum.tadpole.engine.query.dao.system.UserDBDAO">
+         <action
+               class="com.gaia3d.tadpole.spatial.data.core.ui.actions.ImportShapeFileActions"
+               icon="resources/images/shape.png"
+               id="com.gaia3d.tadpole.spatial.data.core.action.shape"
+               label="Import shape file "
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+   </extension>
 
 </plugin>
