@@ -10,8 +10,10 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.wizard.shapeimport;
 
+import java.io.File;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.rap.fileupload.DiskFileUploadReceiver;
 import org.eclipse.rap.fileupload.FileDetails;
@@ -25,14 +27,14 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
-import com.hangum.tadpole.commons.dialogs.fileupload.SingleFileuploadDialog;
+import com.gaia3d.tadpole.spatial.data.core.ui.utils.ZIPUtil;
+import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
+import com.hangum.tadpole.commons.util.Utils;
 
 /**
  * Shape file import wizard
@@ -57,6 +59,7 @@ public class ShapeFileImportWizardPage extends WizardPage {
 	private ServerPushSession pushSession;
 	
 	private Text fileNameLabel;
+	private Text textFileList;
 
 	/**
 	 * Create the wizard.
@@ -94,14 +97,14 @@ public class ShapeFileImportWizardPage extends WizardPage {
 		
 		fileUpload = new FileUpload(compositeHead, SWT.NONE);
 		fileUpload.setText("Select File");
+
 		fileUpload.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		fileUpload.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String fileName = fileUpload.getFileName();
 				if("".equals(fileName) || null == fileName) return; //$NON-NLS-1$
-				
-//				if(!MessageDialog.openConfirm(null, "Confirm", "Do you want file upload?")) return;
+			
 				fileNameLabel.setText(fileName == null ? "" : fileName); //$NON-NLS-1$
 				
 				pushSession.start();
@@ -113,6 +116,9 @@ public class ShapeFileImportWizardPage extends WizardPage {
 		grpFileInformation.setLayout(new GridLayout(1, false));
 		grpFileInformation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		grpFileInformation.setText("File Information");
+		
+		textFileList = new Text(grpFileInformation, SWT.BORDER | SWT.H_SCROLL | SWT.CANCEL | SWT.MULTI);
+		textFileList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 	}
 	
 	/**
@@ -134,7 +140,55 @@ public class ShapeFileImportWizardPage extends WizardPage {
 
 			public void uploadFinished(FileUploadEvent event) {
 				for( FileDetails file : event.getFileDetails() ) {
+					// 업로드 된 파일 목록을 나열한다.
 					addToLog( "uploaded : " + file.getFileName() ); //$NON-NLS-1$
+					
+					// 업로드 된 shape 파일(zip)에 sph, dbf 파일이 있는지 검사한다.
+					// 데이터베이스 용 디렉토리가 없으면 생성합니다.
+					File[] arryFiles = receiver.getTargetFiles();
+					if(arryFiles.length != 0) {
+						File userDBFile = arryFiles[arryFiles.length-1];
+						
+						String strExtractionDir = userDBFile.getParent() + PublicTadpoleDefine.DIR_SEPARATOR + Utils.getUniqueID();
+						
+						if(logger.isDebugEnabled()) {
+							logger.debug("\t source is " + userDBFile.getAbsolutePath());
+							logger.debug("\t target is " + strExtractionDir);
+						}
+
+						try {
+							ZIPUtil unzipUtil = new ZIPUtil();
+							unzipUtil.unzip(userDBFile.getAbsolutePath(), strExtractionDir);
+							
+							String[] listFile = new File(strExtractionDir).list();
+							// 파일 갯수가 하나이고 디렉토리이면 최상위 루트로 생각하고 하위 디렉토리에서 값을 찾습니다.
+							String strWorkingDir = "";
+							if(listFile.length == 1) {
+								strWorkingDir = strExtractionDir + PublicTadpoleDefine.DIR_SEPARATOR + listFile[0];
+							} else {
+								strWorkingDir = strExtractionDir;
+							}
+							
+							if(logger.isDebugEnabled()) logger.debug("extension folder : " + strWorkingDir);
+							String[] strFiles = new File(strWorkingDir).list();
+							final StringBuffer sbFileList = new StringBuffer();
+							for (String string : strFiles) {
+								sbFileList.append(string + PublicTadpoleDefine.LINE_SEPARATOR);
+							}
+							
+							getShell().getDisplay().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									textFileList.setText(sbFileList.toString());		
+								}
+							});
+							
+							
+						} catch(Exception e) {
+							logger.error("upzip exception", e);
+						}
+					}
+					
 				}
 			}			
 		});
