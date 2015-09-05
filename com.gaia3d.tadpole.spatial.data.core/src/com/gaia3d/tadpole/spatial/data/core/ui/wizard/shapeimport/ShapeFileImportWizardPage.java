@@ -12,7 +12,6 @@ package com.gaia3d.tadpole.spatial.data.core.ui.wizard.shapeimport;
 
 import java.io.File;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.rap.fileupload.DiskFileUploadReceiver;
@@ -33,7 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.ZIPUtil;
-import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
+import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.commons.util.Utils;
 
 /**

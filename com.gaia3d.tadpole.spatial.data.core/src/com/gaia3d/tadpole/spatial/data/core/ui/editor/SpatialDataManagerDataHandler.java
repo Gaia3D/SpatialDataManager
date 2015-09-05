@@ -31,7 +31,7 @@ import com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao.RequestSpatialQueryDAO
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialEditorFunction;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler.SpatialFunctionService;
-import com.hangum.tadpold.commons.libs.core.define.SystemDefine;
+import com.hangum.tadpole.commons.libs.core.define.SystemDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.rdb.core.editors.main.MainEditor;

@@ -30,8 +30,8 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPreferenceData;
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
-import com.hangum.tadpold.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
+import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.rdb.core.Activator;
