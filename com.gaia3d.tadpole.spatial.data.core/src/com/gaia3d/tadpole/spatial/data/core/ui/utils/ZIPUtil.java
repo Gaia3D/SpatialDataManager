@@ -31,7 +31,7 @@ public class ZIPUtil {
 	 * @param strZIPFile
 	 * @param strOutputDir
 	 */
-	public void unzip(String strZIPFile, String strOutputDir) throws IOException {
+	public void unzip(String strZIPFile, String strOutputDir) throws Exception {
 //		byte[] buffer = new byte[1024];
 		
 		if(logger.isDebugEnabled()) logger.debug("*** unzip start ***");

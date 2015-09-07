@@ -21,6 +21,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
@@ -56,8 +58,21 @@ public class ImportShapeFileActions implements IViewActionDelegate {
 		}
 		
 		// display import dialog
-		WizardDialog wizardDialog = new WizardDialog(null, new ShapeFileImportWizard());
+		ShapeFileImportWizard wizard = new ShapeFileImportWizard(userDB);
+		WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard) {
+			@Override
+			protected void configureShell(Shell newShell) {
+				super.configureShell(newShell);
+				newShell.setSize(500, 600);
+				
+				Display display = newShell.getDisplay();
+				int x = (display.getBounds().width - newShell.getSize().x)/2;
+				int y = (display.getBounds().height - newShell.getSize().y)/2;
+				newShell.setLocation(x, y);
+			}
+		};
 		wizardDialog.open();
+
 	}
 
 	@Override

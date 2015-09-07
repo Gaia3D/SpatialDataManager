@@ -15,9 +15,7 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.utils;
 
-import oracle.spatial.geometry.JGeometry;
-import oracle.spatial.util.WKT;
-
+import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -29,6 +27,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
+import oracle.spatial.geometry.JGeometry;
+import oracle.spatial.util.WKT;
+
 /**
  * utils
  * 
@@ -36,6 +37,7 @@ import com.vividsolutions.jts.io.WKTReader;
  *
  */
 public class SpatialUtils {
+	private static final Logger logger = Logger.getLogger(SpatialUtils.class);
 
 	/**
 	 * map marker icon
