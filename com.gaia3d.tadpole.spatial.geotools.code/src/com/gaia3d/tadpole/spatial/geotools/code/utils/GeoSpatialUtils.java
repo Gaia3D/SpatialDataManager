@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2014 hangum
+ * Copyright 2015 hangum
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,12 @@ public class GeoSpatialUtils {
 	 */
 	public static List<Map<String, Object>> getShapeToList(String strShapeFile) throws Exception {
 		List<Map<String, Object>> listReturn = new LinkedList<>();
-//		logger.debug("----0");
-		
-//		try {
-//			logger.debug(strShapeFile);
-		    File file = new File(strShapeFile);//"./buildings/buildings.shp");
-//		    logger.debug("File is " + (Boolean.valueOf(file.exists())?"Exist":"does not exist.") );
-		    
-		    FileDataStore myData = FileDataStoreFinder.getDataStore( file );
+	    FileDataStore myData = FileDataStoreFinder.getDataStore(new File(strShapeFile));
 
-			SimpleFeatureSource source = myData.getFeatureSource();
-		    SimpleFeatureType schema = source.getSchema();
-		    Query query = new Query(schema.getTypeName());
-//			query.setMaxFeatures(1);
+		SimpleFeatureSource source = myData.getFeatureSource();
+	    SimpleFeatureType schema = source.getSchema();
+	    Query query = new Query(schema.getTypeName());
+//		query.setMaxFeatures(1);
 	    
 	    FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(query);
 	    try (FeatureIterator<SimpleFeature> features = collection.features()) {
@@ -81,10 +74,6 @@ public class GeoSpatialUtils {
 	            listReturn.add(mapTemp);
 	        }
 	    }
-//		} catch(Throwable e) {
-////			logger.error(e);
-//			e.printStackTrace();
-//		}
 
 		return listReturn;
 	}

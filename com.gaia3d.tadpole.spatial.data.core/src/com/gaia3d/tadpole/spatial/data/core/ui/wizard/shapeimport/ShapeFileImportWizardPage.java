@@ -215,7 +215,7 @@ public class ShapeFileImportWizardPage extends WizardPage {
 					// 데이터베이스 용 디렉토리가 없으면 생성합니다.
 					File[] arryFiles = receiver.getTargetFiles();
 					if(arryFiles.length != 0) {
-						File userDBFile = arryFiles[arryFiles.length-1];
+						final File userDBFile = arryFiles[arryFiles.length-1];
 						
 						final String strExtractionDir = userDBFile.getParent() + PublicTadpoleDefine.DIR_SEPARATOR + Utils.getUniqueID();
 						
@@ -224,41 +224,40 @@ public class ShapeFileImportWizardPage extends WizardPage {
 							logger.debug("\t target is " + strExtractionDir);
 						}
 
-						try {
-							ZIPUtil unzipUtil = new ZIPUtil();
-							unzipUtil.unzip(userDBFile.getAbsolutePath(), strExtractionDir);
-							
-							String[] listFile = new File(strExtractionDir).list();
-							// 파일 갯수가 하나이고 디렉토리이면 최상위 루트로 생각하고 하위 디렉토리에서 값을 찾습니다.
-							String strWorkingDir = "";
-							if(listFile.length == 1) {
-								strWorkingDir = strExtractionDir + PublicTadpoleDefine.DIR_SEPARATOR + listFile[0];
-							} else {
-								strWorkingDir = strExtractionDir;
-							}
-							
-							if(logger.isDebugEnabled()) logger.debug("extension folder : " + strWorkingDir);
-							final String[] strFiles = new File(strWorkingDir).list();
-							final StringBuffer sbFileList = new StringBuffer();
-							
-							String strTmpShapeFile = "";
-							String strTmpDBFFile  = "";
-							for (String strFile : strFiles) {
-								if(logger.isDebugEnabled()) logger.debug("/t file is "+ strFile);
-								sbFileList.append(strFile + PublicTadpoleDefine.LINE_SEPARATOR);
-								if(StringUtils.endsWith(strFile, ".shp")) strTmpShapeFile = strFile;
-								else if(StringUtils.endsWith(strFile, ".dbf")) strTmpDBFFile = strFile;
-							}
-							final String strShapeFile = strTmpShapeFile;
-							final String strDBFile = strTmpDBFFile;
-							
-							getShell().getDisplay().asyncExec(new Runnable() {
-								@Override
-								public void run() {
+						
+						getShell().getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									ZIPUtil unzipUtil = new ZIPUtil();
+									unzipUtil.unzip(userDBFile.getAbsolutePath(), strExtractionDir);
+									
+									String[] listFile = new File(strExtractionDir).list();
+									// 파일 갯수가 하나이고 디렉토리이면 최상위 루트로 생각하고 하위 디렉토리에서 값을 찾습니다.
+									String strWorkingDir = "";
+									if(listFile.length == 1) {
+										strWorkingDir = strExtractionDir + PublicTadpoleDefine.DIR_SEPARATOR + listFile[0];
+									} else {
+										strWorkingDir = strExtractionDir;
+									}
+									
+									if(logger.isDebugEnabled()) logger.debug("extension folder : " + strWorkingDir);
+									final String[] strFiles = new File(strWorkingDir).list();
+									final StringBuffer sbFileList = new StringBuffer();
+									
+									String strShapeFile = "";
+									String strDBFFile  = "";
+									for (String strFile : strFiles) {
+										if(logger.isDebugEnabled()) logger.debug("/t file is "+ strFile);
+										sbFileList.append(strFile + PublicTadpoleDefine.LINE_SEPARATOR);
+										if(StringUtils.endsWith(strFile, ".shp")) strShapeFile = strFile;
+										else if(StringUtils.endsWith(strFile, ".dbf")) strDBFFile = strFile;
+									}
+
 									if(strShapeFile.equals("")) {
 										MessageDialog.openError(getShell(), "Error", "Does not exist shape file.");
 										return;
-									} else if(strDBFile.equals("")) {
+									} else if(strDBFFile.equals("")) {
 										MessageDialog.openError(getShell(), "Error", "Does not exist Dbase file.");
 										return;
 									}
@@ -278,26 +277,23 @@ public class ShapeFileImportWizardPage extends WizardPage {
 										logger.error("Parse shape", e);
 										MessageDialog.openError(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
 									}
+								} catch(final Exception e) {
+									logger.error("upzip exception", e);
 									
+									getShell().getDisplay().asyncExec(new Runnable() {
+										@Override
+										public void run() {
+											textFileList.setText("");
+											textTableName.setText("");
+											
+											MessageDialog.openError(getShell(), "Error", e.getMessage());
+										}
+									});
 								}
-							});
-							
-						} catch(final Exception e) {
-							logger.error("upzip exception", e);
-							
-							getShell().getDisplay().asyncExec(new Runnable() {
-								@Override
-								public void run() {
-									textFileList.setText("");
-									textTableName.setText("");
-									
-									MessageDialog.openError(getShell(), "Error", e.getMessage());
-								}
-							});
-						}
-					}
-					
-				}
+							}
+						});
+					}	// if(arryFiles.length != 0) {
+				} //for( FileDetails file : event.getFileDetails() ) {
 			}			
 		});
 		

@@ -35,6 +35,12 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  * 	1.3 Shapefile attribute format (.dbf)
  * 	1.4 Shapefile spatial index format (.sbn)
  * 
+ * insert 문 참고 
+ * 			http://gis.stackexchange.com/questions/24486/how-to-insert-a-point-into-postgis
+ * 
+ * library 가져올 때.
+ * 			http://docs.geotools.org/latest/userguide/tutorial/quickstart/eclipse.html
+ * 
  * @author hangum
  *
  */
@@ -42,7 +48,7 @@ public class ShapeFileImportWizard extends Wizard {
 	private static final Logger logger = Logger.getLogger(ShapeFileImportWizard.class);
 	
 	private UserDBDAO userDB;
-	private int intCommitCount = 1000;
+	private int intCommitCount = 3000;
 	
 	/** define insert into statement */
 	private String INSERT_STATEMENT = "INSERT INTO %s(%s)\n VALUES(%s);\n";
@@ -67,6 +73,8 @@ public class ShapeFileImportWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		ShapeImportDTO shapeDto = uploadWizardPage.getDTO();
+		
+		if(!MessageDialog.openConfirm(getShell(), "Confirm", "Do you want to upload?")) return false;
 		
 		java.sql.Connection javaConn = null;
 		Statement statement = null;
@@ -96,8 +104,6 @@ public class ShapeFileImportWizard extends Wizard {
 					} else {
 						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);
 					}
-					
-//					strTmpValue = StringHelper.escapeSQL(strTmpValue);
 					
 					values.append(strTmpValue);
 				}
