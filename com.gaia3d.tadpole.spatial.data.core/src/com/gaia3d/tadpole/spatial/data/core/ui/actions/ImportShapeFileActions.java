@@ -25,12 +25,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.data.core.ui.wizard.shapeimport.ShapeFileImportWizard;
+import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
+import com.hangum.tadpole.rdb.core.viewers.object.ExplorerViewer;
 
 /**
  * Import shape file actionss
@@ -48,7 +51,7 @@ public class ImportShapeFileActions implements IViewActionDelegate {
 
 	@Override
 	public void run(IAction action) {
-		UserDBDAO userDB = (UserDBDAO)sel.getFirstElement();
+		final UserDBDAO userDB = (UserDBDAO)sel.getFirstElement();
 		
 		SpatiaDBFactory factory = new SpatiaDBFactory();
 		SpatialDB spatialDB = factory.getSpatialDB(userDB);
@@ -71,8 +74,20 @@ public class ImportShapeFileActions implements IViewActionDelegate {
 				newShell.setLocation(x, y);
 			}
 		};
-		wizardDialog.open();
 
+		if(WizardDialog.OK == wizardDialog.open()) {
+			Display.getCurrent().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						ExplorerViewer ev = (ExplorerViewer)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ExplorerViewer.ID);
+						ev.refreshCurrentTab(userDB, PublicTadpoleDefine.QUERY_DDL_TYPE.TABLE);
+					} catch (PartInitException e) {
+						logger.error("find explorer view", e);
+					}
+				}
+			});	// end display
+		}
 	}
 
 	@Override

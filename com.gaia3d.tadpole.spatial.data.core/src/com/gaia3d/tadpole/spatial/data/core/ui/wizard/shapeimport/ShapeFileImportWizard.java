@@ -77,9 +77,7 @@ public class ShapeFileImportWizard extends Wizard {
 			statement = javaConn.createStatement();
 			
 			// create 문을 인서트하고.
-			if(logger.isDebugEnabled()) logger.debug("create 문을 생성을 시작 했습니다.");
 			statement.execute(shapeDto.getCreate_statement());
-			if(logger.isDebugEnabled()) logger.debug("create 문을 생성했습니다.");
 			
 			// insert into 문을 인서트합니다잉.
 			int count = 0;
