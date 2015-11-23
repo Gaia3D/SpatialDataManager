@@ -24,12 +24,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -53,15 +47,14 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 
-import com.gaia3d.tadpole.spatial.data.core.Activator;
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.ZIPUtil;
 import com.gaia3d.tadpole.spatial.geotools.code.utils.GeoSpatialUtils;
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.commons.util.Utils;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
+import com.hangum.tadpole.rdb.core.dialog.msg.TDBErroDialog;
 import com.ibatis.sqlmap.client.SqlMapClient;
 
 /**
@@ -109,6 +102,7 @@ public class ShapeFileImportDialog extends Dialog {
 	private Text textTableName;
 	private Text textSRID;
 	private Text textSQL;
+	private Text textCharacterSet;
 	
 	/** list shape file */
 	private List<Map<String, Object>> listShape = new ArrayList<>();
@@ -217,7 +211,15 @@ public class ShapeFileImportDialog extends Dialog {
 		
 		textSRID = new Text(compositeTail, SWT.BORDER);
 		textSRID.setText("4326");
-		textSRID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		textSRID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		
+		Label lblCharacterSet = new Label(compositeTail, SWT.NONE);
+		lblCharacterSet.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblCharacterSet.setText("Character Set");
+		
+		textCharacterSet = new Text(compositeTail, SWT.BORDER);
+		textCharacterSet.setText("euc-kr");
+		textCharacterSet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
 		return containerMain;
 	}
@@ -321,13 +323,15 @@ public class ShapeFileImportDialog extends Dialog {
 								
 								try {
 									listShape = GeoSpatialUtils.getShapeToList(strExtractionDir + "/" + strShapeFile);
-									logger.debug("\tShape file total line is " + listShape.size());
+									if(logger.isDebugEnabled()) logger.debug("\tShape file total line is " + listShape.size());
 									String strCreateStatement = generateCreateStatement(textTableName.getText(), textSRID.getText());
 									
 									textSQL.setText(strCreateStatement);
 								} catch (Exception e) {
 									logger.error("Parse shape", e);
-									MessageDialog.openError(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
+//									MessageDialog.openError(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
+									TDBErroDialog dialog = new TDBErroDialog(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
+									dialog.open();
 								}
 							} catch(final Exception e) {
 								logger.error("upzip exception", e);
@@ -338,7 +342,9 @@ public class ShapeFileImportDialog extends Dialog {
 										textFileList.setText("");
 										textTableName.setText("");
 										
-										MessageDialog.openError(getShell(), "Error", e.getMessage());
+//										MessageDialog.openError(getShell(), "Error", e.getMessage());
+										TDBErroDialog dialog = new TDBErroDialog(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
+										dialog.open();
 									}
 								});
 							}
@@ -358,6 +364,8 @@ public class ShapeFileImportDialog extends Dialog {
 		final ShapeImportDTO shapeDto = getDTO();
 		java.sql.Connection javaConn = null;
 		Statement statement = null;
+		
+		String strCharSet = textCharacterSet.getText();
 		
 		try {
 			SqlMapClient client = TadpoleSQLManager.getInstance(userDB);
@@ -383,6 +391,7 @@ public class ShapeFileImportDialog extends Dialog {
 						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue, shapeDto.getSrid());
 					} else {
 						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);
+						if(!"".equals(strCharSet)) strTmpValue = new String(strTmpValue.getBytes("8859_1"), strCharSet);//"euc-kr");
 					}
 					
 					values.append(strTmpValue);
@@ -391,6 +400,7 @@ public class ShapeFileImportDialog extends Dialog {
 				String strQuery = String.format(INSERT_STATEMENT, shapeDto.getTableName(), 
 						StringUtils.removeEnd(columnName.toString(), ","), 
 						StringUtils.removeStart(values.toString(), ","));
+				
 				statement.addBatch(strQuery);
 				totCount += 1;
 				if(++count % intCommitCount == 0) {
@@ -405,7 +415,8 @@ public class ShapeFileImportDialog extends Dialog {
 		} catch(Exception e) {
 			logger.error("Rise excepiton", e);
 			
-			MessageDialog.openError(null, "Error", e.getMessage());
+			TDBErroDialog dialog = new TDBErroDialog(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
+			dialog.open();
 		} finally {
 			try { statement.close();} catch(Exception e) {}
 			try { javaConn.close(); } catch(Exception e){}
