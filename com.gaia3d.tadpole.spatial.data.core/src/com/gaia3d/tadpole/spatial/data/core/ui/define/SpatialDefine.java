@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.define;
 
+import org.apache.log4j.Logger;
+
 /**
  * spatial define
  * 
@@ -22,7 +24,9 @@ package com.gaia3d.tadpole.spatial.data.core.ui.define;
  *
  */
 public class SpatialDefine {
+	private static final Logger logger = Logger.getLogger(SpatialDefine.class);
 	
 	/** define spatial icon */
 	public final static String SPATIAL_ICON = "resources/images/map-marker-16.png";
+	
 }

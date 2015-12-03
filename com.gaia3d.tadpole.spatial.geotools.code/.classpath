@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="libs/gt_shapefile/json-simple-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/gt_shapefile/gt-geojson-13.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gt_shapefile/commons-pool-1.5.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gt_shapefile/gt-api-13.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gt_shapefile/gt-data-13.2.jar"/>

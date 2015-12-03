@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gaia3d.tadpole.spatial.data.core.ui.editor;
+package com.gaia3d.tadpole.spatial.data.core.ui.editor.extension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +28,12 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
+import com.gaia3d.tadpole.spatial.data.core.spaitaldb.utils.GEOJSONUtils;
 import com.gaia3d.tadpole.spatial.data.core.ui.preference.data.SpatialGetPreferenceData;
-import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpole.ace.editor.core.utils.TadpoleEditorUtils;
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
-import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.rdb.core.Activator;
-import com.vividsolutions.jts.io.ParseException;
 
 /**
  * Tadpole extension to spatial data manager 
@@ -46,16 +44,7 @@ import com.vividsolutions.jts.io.ParseException;
 public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler {
 	private static final Logger logger = Logger.getLogger(SpatialDataManagerMainEditor.class);
 	
-	/** 
-	 * postgis의 쿼리 결과를 leaflet에 주기위해 전체 GEOJSON 
-	 */
-	private static final String TEMP_GEOJSON = "{\"type\": \"FeatureCollection\",\"features\":[ %s ]}";
-	
-	/**
-	 * postgis의 쿼리 결과 leaflet에 주기위해 부분 GEOJSON
-	 * TEMP_GEOJSON 안에 들어가야 합니다.
-	 */
-	private static final String TEMP_GEOJSON_GEOMETRY = "{ \"type\": \"Feature\", \"geometry\": %s }";
+	private QueryExecuteResultDTO rsDAO;
 	
 	/** 결과 중에 geojson column index */
 	protected List<Integer> listGisColumnIndex = new ArrayList<>();
@@ -111,7 +100,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 				listMapColumns.add(mapColumns);
 				
 				browserMap.evaluate(String.format(
-										"onClickPoint('%s', '%s');", makeGeoJSON(listMapColumns), getTooltip()
+										"onClickPoint('%s', '%s');", GEOJSONUtils.makeFeatureCollection(getEditorUserDB(), rsDAO, listGisColumnIndex, listMapColumns, false), getTooltip()
 									)	// end String.format
 						);
 			}
@@ -154,6 +143,9 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 */
 	@Override
 	public void queryEndedExecute(final QueryExecuteResultDTO rsDAO) {
+		if(rsDAO == null) return;
+		if(rsDAO.getDataList() == null) return;
+		
 		listGisColumnIndex.clear();
 		listNonGisColumnIndex.clear();
 		
@@ -239,7 +231,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						public void run() {
 							 
 							browserMap.evaluate(String.format("drawingMapInit('%s', '%s');", 
-																makeGeoJSON(listGJson), strUserOptions)
+									GEOJSONUtils.makeFeatureCollection(getEditorUserDB(), rsDAO, listGisColumnIndex, listGJson, false), strUserOptions)
 												);
 						}
 					});
@@ -255,7 +247,7 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 						@Override
 						public void run() {
 							browserMap.evaluate(String.format("drawMapAddData('%s');", 
-													makeGeoJSON(listGJson))
+									GEOJSONUtils.makeFeatureCollection(getEditorUserDB(), rsDAO, listGisColumnIndex, listGJson, false))
 												);
 						}
 					});
@@ -289,51 +281,4 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	private void clearAllLayersMap() {
 		browserMap.evaluate("clearAllLayersMap();");
 	}
-	
-	/**
-	 * 데이터를 leaflet에서 지도에 표시할 수 있도록 데이터를 만듭니다.
-	 * 
-	 * @param resultData
-	 * @return
-	 */
-	private String makeGeoJSON(final List<Map<Integer, Object>> resultData) {
-		final List<String> listGisColumnGjson = new ArrayList<>();
-		
-		for(Object objResult : resultData.toArray()) {
-			final Map<Integer, Object> mapResult = (Map<Integer, Object>)objResult;
-			
-			// 행에 몇개의 geojson 컬럼이 있을지 모르므로. 
-			for(Integer index : listGisColumnIndex) {
-				if(getEditorUserDB().getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
-					listGisColumnGjson.add(String.format(TEMP_GEOJSON_GEOMETRY, (String)mapResult.get(index)));
-				} else if(getEditorUserDB().getDBDefine() == DBDefine.MSSQL_DEFAULT) {
-					try {
-						String strGeoJson = String.format(TEMP_GEOJSON_GEOMETRY, SpatialUtils.wktToGeojson((String)mapResult.get(index)));
-						listGisColumnGjson.add(strGeoJson);
-					} catch (ParseException e) {
-						logger.error("WKT parse exception", e);
-					}
-				} else if(getEditorUserDB().getDBDefine() == DBDefine.ORACLE_DEFAULT) {
-					try {
-						String strGeojson = SpatialUtils.wktToGeojson(SpatialUtils.oralceStructToWKT((oracle.sql.STRUCT)mapResult.get(index)));
-						String strGeoJson = String.format(TEMP_GEOJSON_GEOMETRY, strGeojson);
-						listGisColumnGjson.add(strGeoJson);
-					} catch (Exception e) {
-						logger.error("WKT parse exception", e);
-					}
-				}
-			} 
-		}
-		
-		StringBuffer tmpSBGeoJson = new StringBuffer();
-		for(int i=0; i<listGisColumnGjson.size(); i++) {
-			String geoJson = listGisColumnGjson.get(i);
-			
-			tmpSBGeoJson.append(geoJson);
-			if(i != (listGisColumnGjson.size()-1)) tmpSBGeoJson.append(", ");
-		}
-			
-		return TadpoleEditorUtils.getGrantText(String.format(TEMP_GEOJSON, tmpSBGeoJson.toString()));
-	}
-	
 }

@@ -56,4 +56,11 @@ public interface SpatialDB {
 	public RequestSpatialQueryDAO makeSpatialQuery(RequestSpatialQueryDAO dao);
 		
 
+	/**
+	 * Result query to geojsonfeature
+	 *
+	 * @param query
+	 * @return
+	 */
+	public String makeGeojsonFeature(String query) throws Exception;
 }

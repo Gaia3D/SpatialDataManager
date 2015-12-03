@@ -4,7 +4,7 @@
    <extension
          point="com.hangum.tadpole.rdb.core.extensionpoint.definition.main.editor">
       <mainEditor
-            class="com.gaia3d.tadpole.spatial.data.core.ui.editor.SpatialDataManagerMainEditor">
+            class="com.gaia3d.tadpole.spatial.data.core.ui.editor.extension.SpatialDataManagerMainEditor">
       </mainEditor>
    </extension>
    <extension
@@ -42,12 +42,29 @@
             objectClass="com.hangum.tadpole.engine.query.dao.system.UserDBDAO">
          <action
                class="com.gaia3d.tadpole.spatial.data.core.ui.actions.ImportShapeFileActions"
-               icon="resources/images/shape.png"
-               id="com.gaia3d.tadpole.spatial.data.core.action.shape"
+               icon="resources/images/shape_import.png"
+               id="com.gaia3d.tadpole.spatial.data.core.action.shape.import"
                label="Import shape file "
                menubarPath="additions">
          </action>
+         <action
+               class="com.gaia3d.tadpole.spatial.data.core.ui.actions.ExportShapeFileActions"
+               icon="resources/images/shape_export.png"
+               id="com.gaia3d.tadpole.spatial.data.core.action.shape.export"
+               label="Export shape file"
+               menubarPath="additions">
+         </action>
       </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.gaia3d.tadpole.spatial.data.core.ui.editor.shape.SQLToShapeEditor"
+            default="false"
+            icon="resources/images/shape_export.png"
+            id="com.gaia3d.tadpole.spatial.data.core.editor.shapeExport"
+            name="Export shape file">
+      </editor>
    </extension>
 
 </plugin>

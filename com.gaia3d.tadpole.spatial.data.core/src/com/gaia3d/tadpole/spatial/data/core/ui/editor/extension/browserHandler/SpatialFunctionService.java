@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gaia3d.tadpole.spatial.data.core.ui.editor.browserHandler;
+package com.gaia3d.tadpole.spatial.data.core.ui.editor.extension.browserHandler;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;

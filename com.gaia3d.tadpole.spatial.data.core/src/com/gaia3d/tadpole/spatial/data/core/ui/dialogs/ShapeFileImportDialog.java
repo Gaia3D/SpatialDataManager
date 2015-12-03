@@ -439,7 +439,9 @@ public class ShapeFileImportDialog extends Dialog {
 		for(String strKey : mapShape.keySet()) {
 			Object obj = mapShape.get(strKey);
 			
-			if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
+			if(obj == null) {
+				sbSQL.append(String.format(CREATE_STATEMENT_NORMAL, strKey));
+			} else if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
 				String strColumnData =""+ mapShape.get(strKey);
 				String strGeoType = StringUtils.substringBefore(strColumnData, "(");
 				
