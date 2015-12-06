@@ -11,7 +11,6 @@
 package com.gaia3d.tadpole.spatial.data.core.ui.utils;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.zeroturnaround.zip.ZipUtil;

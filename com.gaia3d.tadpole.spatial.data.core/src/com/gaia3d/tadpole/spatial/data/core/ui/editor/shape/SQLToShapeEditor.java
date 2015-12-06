@@ -15,12 +15,21 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.ui.editor.shape;
 
+import java.io.File;
 import java.io.FileWriter;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.rap.rwt.RWT;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -36,10 +46,15 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
+import com.gaia3d.tadpole.spatial.data.core.Activator;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.geotools.code.utils.GeoSpatialUtils;
+import com.hangum.tadpole.commons.util.download.DownloadServiceHandler;
+import com.hangum.tadpole.commons.util.download.DownloadUtils;
+import com.hangum.tadpole.commons.utils.zip.util.ZipUtils;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
+import com.hangum.tadpole.engine.sql.util.SQLUtil;
 
 /**
  * SQL to shape exporter
@@ -52,6 +67,7 @@ public class SQLToShapeEditor extends EditorPart {
 	public static final String ID = "com.gaia3d.tadpole.spatial.data.core.editor.shapeExport";
 	private UserDBDAO userDB;
 	private Text textSQL;
+	private DownloadServiceHandler downloadServiceHandler;
 
 	public SQLToShapeEditor() {
 		super();
@@ -120,37 +136,150 @@ public class SQLToShapeEditor extends EditorPart {
 			}
 		});
 		btnExportShape.setText("Export Shape");
+		
+		registerServiceHandler();
 	}
 	
 	/** 
 	 * export shape 
 	 */
 	private void exportShape() {
-		String strQuery = textSQL.getText();
-		
-		// gem 컬럼이 있는지 검사합니다. 
-		SpatiaDBFactory factory = new SpatiaDBFactory();
-		SpatialDB spatialDB = factory.getSpatialDB(userDB);
-		try {
-			String strGeojsonFeature = StringEscapeUtils.unescapeJava(spatialDB.makeGeojsonFeature(strQuery));
-			String root = "/Users/hangum/Downloads/example_shape_file/test/";
-			String fileName = "FeatureCollection.json";
-			FileWriter fw = new FileWriter(root+fileName);
-			fw.write(strGeojsonFeature);
-			fw.flush();
-			
-			GeoSpatialUtils.toShp(root+fileName, root+fileName+".shp");
-			
-			logger.debug("==[start]=======================================================================================================================");
-			logger.debug(strGeojsonFeature);
-			logger.debug("==[end]=======================================================================================================================");
-			GeoSpatialUtils.getShapeToList(root+fileName+".shp");
-			logger.debug("==[end]=======================================================================================================================");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		final String strQuery =  SQLUtil.sqlExecutable(textSQL.getText());
+		if("".equals(StringUtils.trimToEmpty(strQuery))) {
+			MessageDialog.openError(null, "Error", "Please input query.");
+			return;
 		}
+		
+		final Display display = getSite().getShell().getDisplay();
+		Job job = new Job("Export shapefile") {
+			@Override
+			public IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("Export shapefile", IProgressMonitor.UNKNOWN);
+				
+				try {
+
+					monitor.setTaskName("Initialize Shape factory");
+					// gem 컬럼이 있는지 검사합니다. 
+					SpatiaDBFactory factory = new SpatiaDBFactory();
+					SpatialDB spatialDB = factory.getSpatialDB(userDB);
+					monitor.setTaskName("Execute user query");
+					String strGeojsonFeature = StringEscapeUtils.unescapeJava(spatialDB.makeGeojsonFeature(strQuery));
+					monitor.setTaskName("Make query result");
+					String root 	= "/Users/hangum/Downloads/example_shape_file/test/";//PublicTadpoleDefine.TEMP_DIR + System.currentTimeMillis() + PublicTadpoleDefine.DIR_SEPARATOR;
+					String geojsonFileName = "SDMShapeFile.json";
+					
+					new File(root).mkdirs();
+					
+					FileWriter fw = new FileWriter(root+geojsonFileName);
+					fw.write(strGeojsonFeature);
+					fw.flush();
+					
+					logger.debug("geojson localtion : " + root + geojsonFileName);
+					monitor.setTaskName("Make shapefile");
+					GeoSpatialUtils.toShp(root+geojsonFileName, root+geojsonFileName+".shp");
+					logger.debug("shape localtion : " + root+geojsonFileName+".shp");
+					monitor.setTaskName("Make zipfile and download");
+					downloadFile(root);
+					
+					FileUtils.deleteDirectory(new File(root));
+					
+//					byte[] bytesZip = FileUtils.readFileToByteArray(new File(strZipFile));						
+//					logger.debug("==[start]=======================================================================================================================");
+//					logger.debug(StringUtils.substring(strGeojsonFeature, 0, 100));
+//					logger.debug("==[end]=======================================================================================================================");
+//					GeoSpatialUtils.getShapeToList(root+geojsonFileName+".shp");
+//					logger.debug("==[end]=======================================================================================================================");
+
+				} catch(Exception e) {
+					logger.error("Shape exporter", e); //$NON-NLS-1$
+					
+					return new Status(Status.WARNING, Activator.PLUGIN_ID, e.getMessage(), e);
+				} finally {
+					monitor.done();
+				}
+				
+				/////////////////////////////////////////////////////////////////////////////////////////
+				return Status.OK_STATUS;
+			}
+		};
+		
+		// job의 event를 처리해 줍니다.
+		job.addJobChangeListener(new JobChangeAdapter() {
+			public void done(IJobChangeEvent event) {
+				final IJobChangeEvent jobEvent = event; 
+				
+				final Display display = getSite().getShell().getDisplay();
+				display.asyncExec(new Runnable() {
+					public void run() {
+						if(jobEvent.getResult().isOK()) {
+							MessageDialog.openInformation(display.getActiveShell(), "OK", "Maked shape file.  Checked your directory.");
+						} else {
+							MessageDialog.openError(display.getActiveShell(), "Fail", jobEvent.getResult().getMessage());
+						}
+					}
+				});	// end display.asyncExec
+			}	// end done
+			
+		});	// end job
+		
+		job.setName("Database compare");
+		job.setUser(true);
+		job.schedule();
+		
 	}
+	
+	/**
+	 * download file
+	 * @param strFileLocation
+	 * @throws Exception
+	 */
+	private void downloadFile(String strFileLocation) throws Exception {
+		String strZipFile = ZipUtils.pack(strFileLocation);
+		byte[] bytesZip = FileUtils.readFileToByteArray(new File(strZipFile));
+		
+		downloadExtFile("SDMShape.zip", bytesZip); //$NON-NLS-1$
+	}
+	
+	/** registery service handler */
+	private void registerServiceHandler() {
+		downloadServiceHandler = new DownloadServiceHandler();
+		RWT.getServiceManager().registerServiceHandler(downloadServiceHandler.getId(), downloadServiceHandler);
+	}
+	
+	/** download service handler call */
+	private void unregisterServiceHandler() {
+		RWT.getServiceManager().unregisterServiceHandler(downloadServiceHandler.getId());
+		downloadServiceHandler = null;
+	}
+	
+	/**
+	 * download external file
+	 * 
+	 * @param fileName
+	 * @param newContents
+	 */
+	private void downloadExtFile(String fileName, byte[] newContents) {
+		downloadServiceHandler.setName(fileName);
+		downloadServiceHandler.setByteContent(newContents);
+		
+		final Display display = getSite().getShell().getDisplay();
+		display.asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				DownloadUtils.provideDownload(getSite().getShell(), downloadServiceHandler.getId());
+			}
+			
+		});
+		
+	}
+	
+	@Override
+	public void dispose() {
+		unregisterServiceHandler();
+		super.dispose();
+	}
+	
 
 	@Override
 	public void setFocus() {

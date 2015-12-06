@@ -116,7 +116,7 @@ public class GEOJSONUtils {
 						if(SDMUtiils.isSpitailColumn(userDB, strSearchType)) continue;
 						
 						if(RDBTypeToJavaTypeUtils.isNumberType(rsDAO.getColumnType().get(intKey))) {
-							System.out.println(mapColumnName.get(intKey) + "=====" + mapResult.get(intKey));
+//							System.out.println(mapColumnName.get(intKey) + "=====" + mapResult.get(intKey));
 							strBfProp.append(String.format("\"%s\":%s,", mapColumnName.get(intKey), mapResult.get(intKey)));
 						} else {
 							strBfProp.append(String.format("\"%s\":\"%s\",", mapColumnName.get(intKey), mapResult.get(intKey)));
@@ -159,6 +159,7 @@ public class GEOJSONUtils {
 												final List<Map<Integer, Object>> resultData, 
 												boolean isProperties
 	) {
+//		if(rsDAO == null) return "";
 		return TadpoleEditorUtils.getGrantText(String.format(GEOJSON_FEATURECOLLECTION, makeFeature(userDB, rsDAO, listGisColumnIndex, resultData, isProperties)));
 	}
 }

@@ -16,18 +16,18 @@
  */
 package org.geotools.util.logging;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.logging.LogRecord;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Logger;
 
-import org.geotools.resources.XArray;
 import org.geotools.resources.Classes;
-import org.geotools.resources.i18n.Errors;
+import org.geotools.resources.XArray;
 import org.geotools.resources.i18n.ErrorKeys;
+import org.geotools.resources.i18n.Errors;
 
 /**
  * A set of utilities method for configuring loggings in GeoTools. <strong>All GeoTools

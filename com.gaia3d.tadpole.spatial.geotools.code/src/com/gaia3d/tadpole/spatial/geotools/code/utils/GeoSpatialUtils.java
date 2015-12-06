@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,8 +28,6 @@ import org.apache.log4j.Logger;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.Query;
-import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -41,7 +38,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 /**
- * utils
+ * geo spatial utils
+ * 
+ * shape file merge : http://www.helptouser.com/gis/44874-merging-shapefiles-with-geotools.html
  * 
  * @author hangum
  *
@@ -49,32 +48,32 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class GeoSpatialUtils {
 	private static final Logger logger = Logger.getLogger(GeoSpatialUtils.class);
 	
-//	public static void main(String[] args) {
-////		GeoSpatialUtils.geoJsonToShape();
-//		try {
-//			GeoSpatialUtils.toShp("/Users/hangum/Downloads/example_shape_file/FeatureCollection.json", "/Users/hangum/Downloads/example_shape_file/test.shp");
-//			GeoSpatialUtils.getShapeToList("/Users/hangum/Downloads/example_shape_file/test.shp");
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
+	public static void main(String[] args) {
+//		GeoSpatialUtils.geoJsonToShape();
+		try {
+//			GeoSpatialUtils.toShp("/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json", "/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json.shp");
+//			GeoSpatialUtils.getShapeToList("/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json.shp");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * featuredjson to shape
 	 * 
-	 * @param geojson file
+	 * @param geojsonLocation file
+	 * @param shapeLocation
 	 * @throws Exception
 	 */
 	public static void toShp(String geojsonLocation, String shapeLocation) throws Exception {     
 		File shpFile = new File(shapeLocation);
-		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
-
-		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put("url", shpFile.toURI().toURL());
-		params.put("create spatial index", Boolean.TRUE);
-		params.put("charset", "UTF-8");
-
-		ShapefileDataStore shpDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+//		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
+//
+//		Map<String, Serializable> params = new HashMap<String, Serializable>();
+//		params.put("url", shpFile.toURI().toURL());
+//		params.put("create spatial index", Boolean.TRUE);
+//		params.put("charset", "UTF-8");
+//		ShapefileDataStore shpDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 		InputStream in = new FileInputStream(new File(geojsonLocation));
 		int decimals = 15;
 		GeometryJSON gjson = new GeometryJSON(decimals);
@@ -85,6 +84,9 @@ public class GeoSpatialUtils {
 
 		WriteShapefile writer = new WriteShapefile(shpFile);
 		writer.writeFeatures(fc);
+		
+		fc = null;
+		in = null;
 	}
 	
 	/**
@@ -112,11 +114,11 @@ public class GeoSpatialUtils {
 	            Map<String, Object> mapTemp = new HashMap<>();
 	        	mapTemp.put("id", feature.getID());
 	            
-	            logger.debug("1." + feature.getID() + ": ");
-	            System.out.println("1." + feature.getID() + ": ");
+	            if(logger.isDebugEnabled()) logger.debug("1." + feature.getID() + ": ");
+//	            System.out.println("1." + feature.getID() + ": ");
 	            for (Property attribute : feature.getProperties()) {
-	            	logger.debug("1-1." + "\t"+attribute.getName()+":"+attribute.getValue() );
-	            	System.out.println("1-1." + "\t"+attribute.getName()+":"+attribute.getValue() );
+//	            	logger.debug("1-1." + "\t"+attribute.getName()+":"+attribute.getValue() );
+//	            	System.out.println("1-1." + "\t"+attribute.getName()+":"+attribute.getValue() );
 	                mapTemp.put(attribute.getName().toString(), attribute.getValue());
 	            }
 	            

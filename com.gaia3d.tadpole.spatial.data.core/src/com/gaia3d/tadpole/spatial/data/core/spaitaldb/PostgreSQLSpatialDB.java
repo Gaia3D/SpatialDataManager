@@ -18,20 +18,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.swt.graphics.Image;
 
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao.RequestSpatialQueryDAO;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.AbstractSpatialDB;
-import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
-import com.gaia3d.tadpole.spatial.data.core.spaitaldb.utils.GEOJSONUtils;
 import com.gaia3d.tadpole.spatial.data.core.ui.utils.SpatialUtils;
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
-import com.hangum.tadpole.engine.sql.util.QueryUtils;
-import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
 
 /**
  * postgresql spatial db

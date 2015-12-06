@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.data.core.spaitaldb.db;
 
-import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -114,9 +113,9 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 				String strSearchType 	= (String)mapOriginal.get("type");
 				String strSearchTypeName = (String)mapOriginal.get("typeName");
 				
-				if(logger.isDebugEnabled()) {
-					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
-				}
+//				if(logger.isDebugEnabled()) {
+//					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
+//				}
 				
 				if(SDMUtiils.isSpitailColumn(userDB, strSearchType)) {
 					addCostumeColumn.add(strSearchColumn);
@@ -183,9 +182,9 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 			throw new Exception("Do not find geo column. Please check your geo columns");
 		}
 		
-		System.out.println("================================================================================");
-		System.out.println(dao.getTadpoleFullyQuery());
-		System.out.println("================================================================================");
+//		System.out.println("================================================================================");
+//		System.out.println(dao.getTadpoleFullyQuery());
+//		System.out.println("================================================================================");
 		
 		QueryExecuteResultDTO queryResultDto = QueryUtils.executeQuery(userDB, dao.getTadpoleFullyQuery(), 0, 1000);
 		Map<Integer, String> mapColumnNames = queryResultDto.getColumnName();
