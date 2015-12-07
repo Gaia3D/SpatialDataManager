@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.gaia3d.tadpole.spatial.data.core.ui.dialogs;
+package com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes;
 
 import java.io.File;
 import java.sql.Statement;
@@ -64,48 +64,28 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  * @author hangum
  *
  */
-public class ShapeFileImportDialog extends Dialog {
+public abstract class ShapeFileImportDialog extends Dialog {
 	private static final Logger logger = Logger.getLogger(ShapeFileImportDialog.class);
 	
-	private UserDBDAO userDB;
-	private int intCommitCount = 3000;
-	
-	/** define insert into statement */
-	private String INSERT_STATEMENT = "INSERT INTO %s(%s)\n VALUES(%s);\n";
-	
-	private String INSERT_VALUE_GEOM = ",ST_GeomFromText('%s', %s)";
-	private String INSERT_VALUE_NONE = ",'%s'";
-
-	private String CREATE_STATEMENT_HEAD = 
-		" CREATE TABLE %s(			\n" +  
-		"	gid serial			\n";
-	
-	private String CREATE_STATEMENT_GEO = 
-		"	,%s geometry(%s,%s) \n";
-	
-	private String CREATE_STATEMENT_NORMAL =
-		"	,%s text		\n";
-					
-	private String CREATE_STATEMENT_TAIL =
-		"	,CONSTRAINT %s_pkey PRIMARY KEY (gid) \n" +  
-		");";
+	protected UserDBDAO userDB;
+	protected int intCommitCount = 3000;
 	
 	private static final String INITIAL_TEXT = "No files uploaded."; //$NON-NLS-1$
 	
 	// file upload
-	private FileUpload fileUpload;
-	private DiskFileUploadReceiver receiver;
-	private ServerPushSession pushSession;
+	protected FileUpload fileUpload;
+	protected DiskFileUploadReceiver receiver;
+	protected ServerPushSession pushSession;
 	
-	private Text fileNameLabel;
-	private Text textFileList;
-	private Text textTableName;
-	private Text textSRID;
-	private Text textSQL;
-	private Text textCharacterSet;
+	protected Text fileNameLabel;
+	protected Text textFileList;
+	protected Text textTableName;
+	protected Text textSRID;
+	protected Text textSQL;
+	protected Text textCharacterSet;
 	
 	/** list shape file */
-	private List<Map<String, Object>> listShape = new ArrayList<>();
+	protected List<Map<String, Object>> listShape = new ArrayList<>();
 
 	/**
 	 * Create the dialog.
@@ -357,72 +337,6 @@ public class ShapeFileImportDialog extends Dialog {
 		return uploadHandler.getUploadUrl();
 	}
 	
-	@Override
-	protected void okPressed() {
-
-		if(!MessageDialog.openConfirm(getShell(), "Confirm", "Do you want to upload?")) return ;
-		final ShapeImportDTO shapeDto = getDTO();
-		java.sql.Connection javaConn = null;
-		Statement statement = null;
-		
-		String strCharSet = textCharacterSet.getText();
-		
-		try {
-			SqlMapClient client = TadpoleSQLManager.getInstance(userDB);
-			javaConn = client.getDataSource().getConnection();
-			statement = javaConn.createStatement();
-			
-			// create 문을 인서트하고.
-			statement.execute(shapeDto.getCreate_statement());
-			
-			// insert into 문을 인서트합니다잉.
-			int count = 0;
-			int totCount = 0;
-			for (Map<String, Object> mapShape : shapeDto.getListShape()) {
-				
-				StringBuffer columnName = new StringBuffer();
-				StringBuffer values = new StringBuffer();
-				for(String strKey : mapShape.keySet()) {
-					columnName.append( String.format("%s,", strKey) );
-					Object obj = mapShape.get(strKey);
-					
-					String strTmpValue = StringEscapeUtils.escapeSql(obj.toString());
-					if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
-						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue, shapeDto.getSrid());
-					} else {
-						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);
-						if(!"".equals(strCharSet)) strTmpValue = new String(strTmpValue.getBytes("8859_1"), strCharSet);//"euc-kr");
-					}
-					
-					values.append(strTmpValue);
-				}
-				
-				String strQuery = String.format(INSERT_STATEMENT, shapeDto.getTableName(), 
-						StringUtils.removeEnd(columnName.toString(), ","), 
-						StringUtils.removeStart(values.toString(), ","));
-				
-				statement.addBatch(strQuery);
-				totCount += 1;
-				if(++count % intCommitCount == 0) {
-					if(logger.isDebugEnabled()) logger.debug("executeBatch complement.");
-					statement.executeBatch();
-					count = 0;
-				}
-			}
-			statement.executeBatch();
-			
-			MessageDialog.openInformation(null, "Confirm", "Successful data upload");
-		} catch(Exception e) {
-			logger.error("Rise excepiton", e);
-			
-			TDBErroDialog dialog = new TDBErroDialog(getShell(), "Error", "Shape file parse exception.\n" + e.getMessage());
-			dialog.open();
-		} finally {
-			try { statement.close();} catch(Exception e) {}
-			try { javaConn.close(); } catch(Exception e){}
-		}
-	}
-	
 	/**
 	 * generate create statement
 	 * 
@@ -430,31 +344,7 @@ public class ShapeFileImportDialog extends Dialog {
 	 * @param strSRID
 	 * @return
 	 */
-	private String generateCreateStatement(String strTableName, String strSRID) {
-		if(listShape.isEmpty()) return "";
-	
-		StringBuffer sbSQL = new StringBuffer(String.format(CREATE_STATEMENT_HEAD, strTableName));
-		
-		Map<String, Object> mapShape = listShape.get(0);
-		for(String strKey : mapShape.keySet()) {
-			Object obj = mapShape.get(strKey);
-			
-			if(obj == null) {
-				sbSQL.append(String.format(CREATE_STATEMENT_NORMAL, strKey));
-			} else if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
-				String strColumnData =""+ mapShape.get(strKey);
-				String strGeoType = StringUtils.substringBefore(strColumnData, "(");
-				
-				sbSQL.append(String.format(CREATE_STATEMENT_GEO, strKey, strGeoType, strSRID));
-			} else {
-				sbSQL.append(String.format(CREATE_STATEMENT_NORMAL, strKey));
-			}
-		}
-		
-		sbSQL.append(String.format(CREATE_STATEMENT_TAIL, strTableName));
-		
-		return sbSQL.toString();
-	}
+	protected abstract String generateCreateStatement(String strTableName, String strSRID);
 	
 	/**
 	 * add log file

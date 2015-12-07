@@ -57,7 +57,7 @@ public class ExportShapeFileActions implements IViewActionDelegate {
 		SpatiaDBFactory factory = new SpatiaDBFactory();
 		SpatialDB spatialDB = factory.getSpatialDB(userDB);
 		if(spatialDB == null || spatialDB.isSpatialDBImage() == null) {
-			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Shape file export", "This DB does not Spatial DB. so cat't export shape file.");
+			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Shape file export", "This DB is not Spatial DB. So cat't export shape file.");
 			return;
 		}
 

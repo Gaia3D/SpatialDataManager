@@ -83,7 +83,6 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 		return false;
 	}
 	
-
 	/**
 	 * spatial column이 있다면 원하는 형태로 조작한다.
 	 * 
@@ -182,16 +181,18 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 			throw new Exception("Do not find geo column. Please check your geo columns");
 		}
 		
-//		System.out.println("================================================================================");
-//		System.out.println(dao.getTadpoleFullyQuery());
-//		System.out.println("================================================================================");
+		if(logger.isDebugEnabled()) {
+			logger.debug("================================================================================");
+			logger.debug(dao.getTadpoleFullyQuery());
+			logger.debug("================================================================================");
+		}
 		
 		QueryExecuteResultDTO queryResultDto = QueryUtils.executeQuery(userDB, dao.getTadpoleFullyQuery(), 0, 1000);
 		Map<Integer, String> mapColumnNames = queryResultDto.getColumnName();
 		List<Integer> listGisColumnIndex = new ArrayList<>();
 		List<Integer> listNonGisColumnIndex = new ArrayList<>();
 		
-		System.out.println("result is "+ queryResultDto.getDataList().getData().size());
+		if(logger.isDebugEnabled()) logger.debug("result is "+ queryResultDto.getDataList().getData().size());
 
 		for(int i=0; i<mapColumnNames.size(); i++) {
 			String strSearchColumn = mapColumnNames.get(i);

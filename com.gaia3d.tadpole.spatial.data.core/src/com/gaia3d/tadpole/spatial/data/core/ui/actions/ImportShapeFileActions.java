@@ -26,7 +26,10 @@ import org.eclipse.ui.PlatformUI;
 
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
-import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.ShapeFileImportDialog;
+import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.MssqlShapeFileImportDialog;
+import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.PgsqlShapeFileImportDialog;
+import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.ShapeFileImportDialog;
+import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 
 /**
@@ -53,8 +56,14 @@ public class ImportShapeFileActions implements IViewActionDelegate {
 			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Shape file import", "This DB does not Spatial DB. so cat't import Shape file.");
 			return;
 		}
-		ShapeFileImportDialog dialog = new ShapeFileImportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), userDB);
-		dialog.open();
+		
+		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
+			PgsqlShapeFileImportDialog dialog = new PgsqlShapeFileImportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), userDB);
+			dialog.open();
+		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT) {
+			MssqlShapeFileImportDialog dialog = new MssqlShapeFileImportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), userDB);
+			dialog.open();
+		}
 	}
 
 	@Override

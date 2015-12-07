@@ -50,6 +50,7 @@ import com.gaia3d.tadpole.spatial.data.core.Activator;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.SpatiaDBFactory;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.geotools.code.utils.GeoSpatialUtils;
+import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.commons.util.download.DownloadServiceHandler;
 import com.hangum.tadpole.commons.util.download.DownloadUtils;
 import com.hangum.tadpole.commons.utils.zip.util.ZipUtils;
@@ -68,7 +69,7 @@ public class SQLToShapeEditor extends EditorPart {
 	private UserDBDAO userDB;
 	private Text textSQL;
 	private DownloadServiceHandler downloadServiceHandler;
-
+	
 	public SQLToShapeEditor() {
 		super();
 	}
@@ -150,6 +151,9 @@ public class SQLToShapeEditor extends EditorPart {
 			return;
 		}
 		
+		final String root 	= PublicTadpoleDefine.TEMP_DIR + System.currentTimeMillis() + PublicTadpoleDefine.DIR_SEPARATOR;
+		final String geojsonFileName = "SDMShapeFile.json";
+		
 		final Display display = getSite().getShell().getDisplay();
 		Job job = new Job("Export shapefile") {
 			@Override
@@ -165,8 +169,6 @@ public class SQLToShapeEditor extends EditorPart {
 					monitor.setTaskName("Execute user query");
 					String strGeojsonFeature = StringEscapeUtils.unescapeJava(spatialDB.makeGeojsonFeature(strQuery));
 					monitor.setTaskName("Make query result");
-					String root 	= "/Users/hangum/Downloads/example_shape_file/test/";//PublicTadpoleDefine.TEMP_DIR + System.currentTimeMillis() + PublicTadpoleDefine.DIR_SEPARATOR;
-					String geojsonFileName = "SDMShapeFile.json";
 					
 					new File(root).mkdirs();
 					
