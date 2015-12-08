@@ -54,6 +54,7 @@ import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.commons.util.Utils;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
+import com.hangum.tadpole.engine.sql.util.SQLUtil;
 import com.hangum.tadpole.rdb.core.dialog.msg.TDBErroDialog;
 import com.ibatis.sqlmap.client.SqlMapClient;
 
@@ -68,7 +69,7 @@ public abstract class ShapeFileImportDialog extends Dialog {
 	private static final Logger logger = Logger.getLogger(ShapeFileImportDialog.class);
 	
 	protected UserDBDAO userDB;
-	protected int intCommitCount = 3000;
+	protected static int intCommitCount = 200;
 	
 	private static final String INITIAL_TEXT = "No files uploaded."; //$NON-NLS-1$
 	
@@ -376,7 +377,7 @@ public abstract class ShapeFileImportDialog extends Dialog {
 		ShapeImportDTO dto = new ShapeImportDTO();
 		dto.setTableName(textTableName.getText());
 		dto.setSrid(textSRID.getText());
-		dto.setCreate_statement(textSQL.getText());
+		dto.setCreate_statement(SQLUtil.sqlExecutable(textSQL.getText()));
 		dto.setListShape(listShape);
 		
 		return dto;

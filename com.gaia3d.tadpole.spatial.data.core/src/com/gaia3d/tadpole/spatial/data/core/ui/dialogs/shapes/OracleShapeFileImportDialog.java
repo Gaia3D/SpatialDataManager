@@ -41,21 +41,21 @@ public class OracleShapeFileImportDialog extends ShapeFileImportDialog {
 	/** crate table statement head */
 	public static String CREATE_TABLE_HEAD = 
 			" CREATE TABLE %s(			\n" +  
-			"	sdm_gid serial			\n";
+			"	sdm_gid NUMBER \n";
 		
 	public static String CREATE_TABLE_GEO = 
-		"	,%s geometry(%s,%s) \n";
+		"	,%s SDO_GEOMETRY \n";
 	
 	public static String CREATE_TABLE_NORMAL =
-		"	,%s text		\n";
+		"	,%s varchar(4000)		\n";
 					
 	public static String CREATE_TABLE_KEY =
-		"	,CONSTRAINT %s_pkey PRIMARY KEY (sdm_gid) \n" +  
-		");";
+//		"	,PRIMARY KEY (sdm_gid) \n" +  
+		")";
 		
 	/** define insert into statement */
-	public static String INSERT_STATEMENT = "INSERT INTO %s(%s)\n VALUES(%s);\n";
-	public static String INSERT_VALUE_GEOM = ",ST_GeomFromText('%s', %s)";
+	public static String INSERT_STATEMENT = "INSERT INTO %s(%s) VALUES(%s)\n";
+	public static String INSERT_VALUE_GEOM = ",SDO_GEOMETRY('%s', %s)";
 	public static String INSERT_VALUE_NONE = ",'%s'";
 	
 	public OracleShapeFileImportDialog(Shell parentShell, UserDBDAO userDB) {
@@ -78,6 +78,7 @@ public class OracleShapeFileImportDialog extends ShapeFileImportDialog {
 			statement = javaConn.createStatement();
 			
 			// create 문을 인서트하고.
+			if(logger.isDebugEnabled()) logger.debug(shapeDto.getCreate_statement());
 			statement.execute(shapeDto.getCreate_statement());
 			
 			// insert into 문을 인서트합니다잉.
@@ -95,7 +96,7 @@ public class OracleShapeFileImportDialog extends ShapeFileImportDialog {
 					if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
 						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue, shapeDto.getSrid());
 					} else {
-						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);
+						strTmpValue = String.format(INSERT_VALUE_NONE, StringEscapeUtils.escapeSql(strTmpValue));
 						if(!"".equals(strCharSet)) strTmpValue = new String(strTmpValue.getBytes("8859_1"), strCharSet);//"euc-kr");
 					}
 					
@@ -106,10 +107,12 @@ public class OracleShapeFileImportDialog extends ShapeFileImportDialog {
 						StringUtils.removeEnd(columnName.toString(), ","), 
 						StringUtils.removeStart(values.toString(), ","));
 				
+				if(logger.isDebugEnabled()) logger.debug(strQuery);
+				
 				statement.addBatch(strQuery);
 				totCount += 1;
 				if(++count % intCommitCount == 0) {
-					if(logger.isDebugEnabled()) logger.debug("executeBatch complement.");
+					if(logger.isDebugEnabled()) logger.debug("executeBatch complement. [intCommitCount]" + intCommitCount);
 					statement.executeBatch();
 					count = 0;
 				}
