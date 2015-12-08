@@ -18,7 +18,6 @@ package com.gaia3d.tadpole.spatial.geotools.code.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,30 +62,18 @@ public class GeoSpatialUtils {
 	 * 
 	 * @param geojsonLocation file
 	 * @param shapeLocation
+	 * @return
 	 * @throws Exception
 	 */
-	public static void toShp(String geojsonLocation, String shapeLocation) throws Exception {     
-		File shpFile = new File(shapeLocation);
-//		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
-//
-//		Map<String, Serializable> params = new HashMap<String, Serializable>();
-//		params.put("url", shpFile.toURI().toURL());
-//		params.put("create spatial index", Boolean.TRUE);
-//		params.put("charset", "UTF-8");
-//		ShapefileDataStore shpDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-		InputStream in = new FileInputStream(new File(geojsonLocation));
-		int decimals = 15;
-		GeometryJSON gjson = new GeometryJSON(decimals);
+	public static boolean toShp(String geojsonLocation, String shapeLocation) throws Exception {     
+		GeometryJSON gjson = new GeometryJSON(15);
 		FeatureJSON fjson = new FeatureJSON(gjson);
 		
-		FeatureCollection<SimpleFeatureType, SimpleFeature> fc = fjson.readFeatureCollection(in);
+		FeatureCollection<SimpleFeatureType, SimpleFeature> fc = fjson.readFeatureCollection(new FileInputStream(geojsonLocation));
 		fc.getSchema();
-
-		WriteShapefile writer = new WriteShapefile(shpFile);
-		writer.writeFeatures(fc);
 		
-		fc = null;
-		in = null;
+		WriteShapefile writer = new WriteShapefile(new File(shapeLocation));
+		return writer.writeFeatures(fc);
 	}
 	
 	/**

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -37,6 +36,7 @@ import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.NameImpl;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.feature.type.GeometryDescriptorImpl;
 import org.geotools.feature.type.GeometryTypeImpl;
@@ -51,6 +51,7 @@ import org.opengis.filter.identity.FeatureId;
 /**
  * Write shape file utils
  * 
+ * https://github.com/ianturton/geotools-cookbook/blob/master/modules/output/src/main/java/org/ianturton/cookbook/output/WriteShapefile.java
  * 
  * @author hangum
  *
@@ -79,26 +80,18 @@ public class WriteShapefile {
 
 	/**
 	 * 
-	 * @param features
+	 * @param featureCollection
 	 * @return
 	 */
-	public boolean writeFeatures(FeatureCollection<SimpleFeatureType, SimpleFeature> features) {
+	public boolean writeFeatures(FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection) throws Exception {
 		if (shpDataStore == null) {
 			throw new IllegalStateException("Datastore can not be null when writing");
 		}
-		SimpleFeatureType schema = features.getSchema();
+		SimpleFeatureType schema = featureCollection.getSchema();
 		GeometryDescriptor geom = schema.getGeometryDescriptor();
-		String oldGeomAttrib = "";
+
 		try {
-
-			/*
-			 * Write the features to the shapefile
-			 */
-			Transaction transaction = new DefaultTransaction("create");
-
-			String typeName = shpDataStore.getTypeNames()[0];
-			SimpleFeatureSource featureSource = shpDataStore.getFeatureSource(typeName);
-
+			
 			/*
 			 * The Shapefile format has a couple limitations: - "the_geom" is always
 			 * first, and used for the geometry attribute name - "the_geom" must be of
@@ -117,37 +110,47 @@ public class WriteShapefile {
 				AttributeType type = attrib.getType();
 				if (type instanceof GeometryType) {
 					geomType = (GeometryType) type;
-					oldGeomAttrib = attrib.getLocalName();
+
 				} else {
 					attribs.add(attrib);
 				}
 			}
 
-			GeometryTypeImpl gt = new GeometryTypeImpl(new NameImpl("the_geom"), geomType.getBinding(),
-			    geomType.getCoordinateReferenceSystem(), geomType.isIdentified(), geomType.isAbstract(),
-			    geomType.getRestrictions(), geomType.getSuper(), geomType.getDescription());
+			GeometryTypeImpl gt = new GeometryTypeImpl(new NameImpl("the_geom"),
+					geomType.getBinding(), geomType.getCoordinateReferenceSystem(),
+					geomType.isIdentified(), geomType.isAbstract(),
+					geomType.getRestrictions(), geomType.getSuper(),
+					geomType.getDescription());
 
-			GeometryDescriptor geomDesc = new GeometryDescriptorImpl(gt, new NameImpl("the_geom"), geom.getMinOccurs(),
-			    geom.getMaxOccurs(), geom.isNillable(), geom.getDefaultValue());
+			GeometryDescriptor geomDesc = new GeometryDescriptorImpl(gt,
+					new NameImpl("the_geom"), geom.getMinOccurs(), geom.getMaxOccurs(),
+					geom.isNillable(), geom.getDefaultValue());
 
 			attribs.add(0, geomDesc);
 
-			SimpleFeatureType shpType = new SimpleFeatureTypeImpl(schema.getName(), attribs, geomDesc, schema.isAbstract(),
-			    schema.getRestrictions(), schema.getSuper(), schema.getDescription());
-
+			SimpleFeatureType shpType = new SimpleFeatureTypeImpl(schema.getName(),
+					attribs, geomDesc, schema.isAbstract(), schema.getRestrictions(),
+					schema.getSuper(), schema.getDescription());
 			shpDataStore.createSchema(shpType);
+			
+			/*
+			 * Write the features to the shapefile
+			 */
+			Transaction transaction = new DefaultTransaction("create");
+			String typeName = shpDataStore.getTypeNames()[0];
+			if(logger.isDebugEnabled()) logger.debug("======>[typeName] " + typeName);
+			SimpleFeatureSource featureSource = shpDataStore.getFeatureSource(typeName);
+			if(logger.isDebugEnabled()) logger.debug("======>[featureSource] " + featureSource);
 
-			if (featureSource instanceof SimpleFeatureStore) {
+//			if (featureSource instanceof SimpleFeatureStore) {
 				SimpleFeatureStore featureStore = (SimpleFeatureStore) featureSource;
 
 				List<SimpleFeature> feats = new ArrayList<SimpleFeature>();
 
-				FeatureIterator<SimpleFeature> features2 = features.features();
+				FeatureIterator<SimpleFeature> features2 = featureCollection.features();
 				while (features2.hasNext()) {
 					SimpleFeature f = features2.next();
-					SimpleFeature reType =DataUtilities.reType(shpType, f, true);
-					//set the default Geom (the_geom) from the original Geom
-				    reType.setAttribute("the_geom", f.getAttribute(oldGeomAttrib));
+					SimpleFeature reType = SimpleFeatureBuilder.build(shpType, f.getAttributes(), "");
 
 					feats.add(reType);
 				}
@@ -166,15 +169,17 @@ public class WriteShapefile {
 				}
 				shpDataStore.dispose();
 				return true;
-			} else {
-				shpDataStore.dispose();
-				logger.error("ShapefileStore not writable");
-				return false;
-			}
-		} catch (IOException e) {
-			logger.error("Write shape exception", e);
+//			} else {
+//				shpDataStore.dispose();
+//				throw new Exception("Input file is doesn't  SimpleFeatureStore file. So, ShapefileStore not writable. " + featureSource.getClass());
+//				return false;
+//			}
+		} catch (Exception e) {
+			logger.error("not writterable shape file", e);
+			throw e;
 		}
-		return false;
+//		return false;
+
 	}
 
 	

@@ -91,8 +91,8 @@ public class PgsqlShapeFileImportDialog extends ShapeFileImportDialog {
 					columnName.append( String.format("%s,", strKey) );
 					Object obj = mapShape.get(strKey);
 					
-					String strTmpValue = StringEscapeUtils.escapeSql(obj.toString());
-					if(StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
+					String strTmpValue = StringEscapeUtils.escapeSql(obj==null?"":obj.toString());
+					if(obj != null && StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
 						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue, shapeDto.getSrid());
 					} else {
 						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);

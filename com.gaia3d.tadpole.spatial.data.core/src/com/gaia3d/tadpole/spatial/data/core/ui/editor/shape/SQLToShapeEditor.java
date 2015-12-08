@@ -151,6 +151,8 @@ public class SQLToShapeEditor extends EditorPart {
 			return;
 		}
 		
+		if(!MessageDialog.openConfirm(getSite().getShell(), "Confirm", "Do you want to shapefile export?")) return;
+		
 		final String root 	= PublicTadpoleDefine.TEMP_DIR + System.currentTimeMillis() + PublicTadpoleDefine.DIR_SEPARATOR;
 		final String geojsonFileName = "SDMShapeFile.json";
 		
@@ -178,29 +180,25 @@ public class SQLToShapeEditor extends EditorPart {
 					
 					logger.debug("geojson localtion : " + root + geojsonFileName);
 					monitor.setTaskName("Make shapefile");
-					GeoSpatialUtils.toShp(root+geojsonFileName, root+geojsonFileName+".shp");
+					boolean boolExport = GeoSpatialUtils.toShp(root+geojsonFileName, root+geojsonFileName+".shp");
+					if(boolExport) logger.debug("======[export success]=====================================================");
+					else {
+						logger.info("======[export fail]=====================================================");
+						throw new Exception("Shape file does not export");
+					}
 					logger.debug("shape localtion : " + root+geojsonFileName+".shp");
 					monitor.setTaskName("Make zipfile and download");
 					downloadFile(root);
 					
-					FileUtils.deleteDirectory(new File(root));
-					
-//					byte[] bytesZip = FileUtils.readFileToByteArray(new File(strZipFile));						
-//					logger.debug("==[start]=======================================================================================================================");
-//					logger.debug(StringUtils.substring(strGeojsonFeature, 0, 100));
-//					logger.debug("==[end]=======================================================================================================================");
-//					GeoSpatialUtils.getShapeToList(root+geojsonFileName+".shp");
-//					logger.debug("==[end]=======================================================================================================================");
+//					FileUtils.deleteDirectory(new File(root));
 
 				} catch(Exception e) {
 					logger.error("Shape exporter", e); //$NON-NLS-1$
 					
-					return new Status(Status.WARNING, Activator.PLUGIN_ID, e.getMessage(), e);
+					return new Status(Status.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
 				} finally {
 					monitor.done();
 				}
-				
-				/////////////////////////////////////////////////////////////////////////////////////////
 				return Status.OK_STATUS;
 			}
 		};
@@ -214,8 +212,10 @@ public class SQLToShapeEditor extends EditorPart {
 				display.asyncExec(new Runnable() {
 					public void run() {
 						if(jobEvent.getResult().isOK()) {
-							MessageDialog.openInformation(display.getActiveShell(), "OK", "Maked shape file.  Checked your directory.");
+							logger.debug("Success export shape file.  Checked your directory.");
+							MessageDialog.openInformation(display.getActiveShell(), "OK", "Success export shape file.  Checked your directory.");
 						} else {
+							logger.error(String.format("File export shape file.  reason [%s].", jobEvent.getResult().getMessage()));
 							MessageDialog.openError(display.getActiveShell(), "Fail", jobEvent.getResult().getMessage());
 						}
 					}
