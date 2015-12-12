@@ -16,7 +16,6 @@
 package com.gaia3d.tadpole.spatial.data.core.ui.editor.shape;
 
 import java.io.File;
-import java.io.FileWriter;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -154,7 +153,7 @@ public class SQLToShapeEditor extends EditorPart {
 		if(!MessageDialog.openConfirm(getSite().getShell(), "Confirm", "Do you want to shapefile export?")) return;
 		
 		final String root 	= PublicTadpoleDefine.TEMP_DIR + System.currentTimeMillis() + PublicTadpoleDefine.DIR_SEPARATOR;
-		final String geojsonFileName = "SDMShapeFile.json";
+		final String geojsonFileName = "SDMShapeFileJson";
 		
 		final Display display = getSite().getShell().getDisplay();
 		Job job = new Job("Export shapefile") {
@@ -174,13 +173,14 @@ public class SQLToShapeEditor extends EditorPart {
 					
 					new File(root).mkdirs();
 					
-					FileWriter fw = new FileWriter(root+geojsonFileName);
-					fw.write(strGeojsonFeature);
-					fw.flush();
-					
-					logger.debug("geojson localtion : " + root + geojsonFileName);
+//					FileWriter fw = new FileWriter(root+geojsonFileName);
+//					fw.write(strGeojsonFeature);
+//					fw.flush();
+//					strGeojsonFeature = null;
+//					if(logger.isDebugEnabled()) logger.debug("geojson localtion : " + root + geojsonFileName);
 					monitor.setTaskName("Make shapefile");
-					boolean boolExport = GeoSpatialUtils.toShp(root+geojsonFileName, root+geojsonFileName+".shp");
+					boolean boolExport = GeoSpatialUtils.toShp(strGeojsonFeature, root+geojsonFileName+".shp");
+					strGeojsonFeature = null;
 					if(boolExport) logger.debug("======[export success]=====================================================");
 					else {
 						logger.info("======[export fail]=====================================================");

@@ -116,6 +116,9 @@ public class PgsqlShapeFileImportDialog extends ShapeFileImportDialog {
 			}
 			statement.executeBatch();
 			
+			// 테이블 뷰 디렉토리를 리프레쉬합니다.
+			
+			
 			MessageDialog.openInformation(null, "Confirm", "Successful data upload");
 		} catch(Exception e) {
 			logger.error("Rise excepiton", e);

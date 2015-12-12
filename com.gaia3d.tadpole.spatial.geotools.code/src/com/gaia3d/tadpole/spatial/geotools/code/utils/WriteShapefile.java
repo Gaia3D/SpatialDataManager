@@ -138,11 +138,8 @@ public class WriteShapefile {
 			 */
 			Transaction transaction = new DefaultTransaction("create");
 			String typeName = shpDataStore.getTypeNames()[0];
-			if(logger.isDebugEnabled()) logger.debug("======>[typeName] " + typeName);
 			SimpleFeatureSource featureSource = shpDataStore.getFeatureSource(typeName);
-			if(logger.isDebugEnabled()) logger.debug("======>[featureSource] " + featureSource);
-
-//			if (featureSource instanceof SimpleFeatureStore) {
+			if (featureSource instanceof SimpleFeatureStore) {
 				SimpleFeatureStore featureStore = (SimpleFeatureStore) featureSource;
 
 				List<SimpleFeature> feats = new ArrayList<SimpleFeature>();
@@ -169,18 +166,14 @@ public class WriteShapefile {
 				}
 				shpDataStore.dispose();
 				return true;
-//			} else {
-//				shpDataStore.dispose();
-//				throw new Exception("Input file is doesn't  SimpleFeatureStore file. So, ShapefileStore not writable. " + featureSource.getClass());
-//				return false;
-//			}
+			} else {
+				shpDataStore.dispose();
+				logger.error("Input file is doesn't  SimpleFeatureStore file. So, ShapefileStore not writable. " + featureSource.getClass());
+				throw new Exception("Input file is doesn't  SimpleFeatureStore file. So, ShapefileStore not writable. " + featureSource.getClass());
+			}
 		} catch (Exception e) {
 			logger.error("not writterable shape file", e);
 			throw e;
 		}
-//		return false;
-
 	}
-
-	
 }

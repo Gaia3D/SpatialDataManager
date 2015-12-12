@@ -16,12 +16,10 @@
 package com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes;
 
 import java.io.File;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.Dialog;
@@ -52,11 +50,9 @@ import com.gaia3d.tadpole.spatial.data.core.ui.utils.ZIPUtil;
 import com.gaia3d.tadpole.spatial.geotools.code.utils.GeoSpatialUtils;
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.commons.util.Utils;
-import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.engine.sql.util.SQLUtil;
 import com.hangum.tadpole.rdb.core.dialog.msg.TDBErroDialog;
-import com.ibatis.sqlmap.client.SqlMapClient;
 
 /**
  * 

@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.gaia3d.tadpole.spatial.geotools.code.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,29 +48,21 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class GeoSpatialUtils {
 	private static final Logger logger = Logger.getLogger(GeoSpatialUtils.class);
 	
-	public static void main(String[] args) {
-//		GeoSpatialUtils.geoJsonToShape();
-		try {
-//			GeoSpatialUtils.toShp("/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json", "/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json.shp");
-//			GeoSpatialUtils.getShapeToList("/Users/hangum/Downloads/example_shape_file/test/SDMShapeFile.json.shp");
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * featuredjson to shape
 	 * 
-	 * @param geojsonLocation file
+	 * @param geojsonStr 
 	 * @param shapeLocation
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean toShp(String geojsonLocation, String shapeLocation) throws Exception {     
-		GeometryJSON gjson = new GeometryJSON(15);
+	public static boolean toShp(String geojsonStr, String shapeLocation) throws Exception {
+		if(logger.isDebugEnabled()) logger.debug("##### start ========>make shape file =================");
+		GeometryJSON gjson = new GeometryJSON(150);
 		FeatureJSON fjson = new FeatureJSON(gjson);
 		
-		FeatureCollection<SimpleFeatureType, SimpleFeature> fc = fjson.readFeatureCollection(new FileInputStream(geojsonLocation));
+		FeatureCollection<SimpleFeatureType, SimpleFeature> fc 
+			= fjson.readFeatureCollection(new ByteArrayInputStream(geojsonStr.getBytes(StandardCharsets.UTF_8)));
 		fc.getSchema();
 		
 		WriteShapefile writer = new WriteShapefile(new File(shapeLocation));
@@ -84,7 +77,7 @@ public class GeoSpatialUtils {
 	 * @throws IOException
 	 */
 	public static List<Map<String, Object>> getShapeToList(String strShapeFile) throws Exception {
-		if(logger.isDebugEnabled()) logger.debug("==========> shape to object");
+//		if(logger.isDebugEnabled()) logger.debug("==========> shape to object");
 		List<Map<String, Object>> listReturn = new LinkedList<>();
 	    FileDataStore myData = FileDataStoreFinder.getDataStore(new File(strShapeFile));
 
@@ -101,7 +94,7 @@ public class GeoSpatialUtils {
 	            Map<String, Object> mapTemp = new HashMap<>();
 	        	mapTemp.put("id", feature.getID());
 	            
-	            if(logger.isDebugEnabled()) logger.debug("1." + feature.getID() + ": ");
+//	            if(logger.isDebugEnabled()) logger.debug("1." + feature.getID() + ": ");
 //	            System.out.println("1." + feature.getID() + ": ");
 	            for (Property attribute : feature.getProperties()) {
 //	            	logger.debug("1-1." + "\t"+attribute.getName()+":"+attribute.getValue() );
