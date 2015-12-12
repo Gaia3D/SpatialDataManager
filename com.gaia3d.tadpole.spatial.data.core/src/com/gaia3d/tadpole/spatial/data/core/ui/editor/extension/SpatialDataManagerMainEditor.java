@@ -143,6 +143,9 @@ public class SpatialDataManagerMainEditor extends SpatialDataManagerDataHandler 
 	 */
 	@Override
 	public void queryEndedExecute(final QueryExecuteResultDTO rsDAO) {
+		if(rsDAO == null) return;
+		if(rsDAO.getDataList() == null) return;
+		
 		this.rsDAO = rsDAO;
 		listGisColumnIndex.clear();
 		listNonGisColumnIndex.clear();

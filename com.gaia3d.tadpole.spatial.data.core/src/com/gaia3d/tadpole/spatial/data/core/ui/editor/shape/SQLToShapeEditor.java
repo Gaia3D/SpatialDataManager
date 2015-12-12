@@ -212,7 +212,7 @@ public class SQLToShapeEditor extends EditorPart {
 				display.asyncExec(new Runnable() {
 					public void run() {
 						if(jobEvent.getResult().isOK()) {
-							logger.debug("Success export shape file.  Checked your directory.");
+							if(logger.isDebugEnabled()) logger.debug("Success export shape file.  Checked your directory.");
 							MessageDialog.openInformation(display.getActiveShell(), "OK", "Success export shape file.  Checked your directory.");
 						} else {
 							logger.error(String.format("File export shape file.  reason [%s].", jobEvent.getResult().getMessage()));
@@ -227,7 +227,6 @@ public class SQLToShapeEditor extends EditorPart {
 		job.setName("Database compare");
 		job.setUser(true);
 		job.schedule();
-		
 	}
 	
 	/**
@@ -265,15 +264,11 @@ public class SQLToShapeEditor extends EditorPart {
 		downloadServiceHandler.setByteContent(newContents);
 		
 		final Display display = getSite().getShell().getDisplay();
-		display.asyncExec(new Runnable() {
-
-			@Override
+		display.syncExec(new Runnable() {
 			public void run() {
 				DownloadUtils.provideDownload(getSite().getShell(), downloadServiceHandler.getId());
 			}
-			
 		});
-		
 	}
 	
 	@Override
