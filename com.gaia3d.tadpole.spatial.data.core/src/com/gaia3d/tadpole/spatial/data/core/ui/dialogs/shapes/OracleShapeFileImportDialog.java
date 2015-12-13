@@ -50,7 +50,6 @@ public class OracleShapeFileImportDialog extends ShapeFileImportDialog {
 		"	,%s varchar(4000)		\n";
 					
 	public static String CREATE_TABLE_KEY =
-//		"	,PRIMARY KEY (sdm_gid) \n" +  
 		")";
 		
 	/** define insert into statement */

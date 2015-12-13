@@ -50,7 +50,6 @@ public class MssqlShapeFileImportDialog extends ShapeFileImportDialog {
 		"	,%s text		\n";
 					
 	public static String CREATE_TABLE_KEY =
-//		"	,CONSTRAINT %s_pkey PRIMARY KEY (gid) \n" +  
 		");";
 		
 	/** define insert into statement */

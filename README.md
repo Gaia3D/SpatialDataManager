@@ -11,11 +11,11 @@ Spatial Data Manager는 [Tadpole DB Hub](https://github.com/hangum/TadpoleForDBT
 
 Download
 ===============
-[Click me](https://sourceforge.net/projects/tadpolesdm/files/1.6.x/1.6.1/)
+[http://sourceforge.net/projects/tadpolesdm/files/1.6.x/1.6.7/](http://sourceforge.net/projects/tadpolesdm/files/1.6.x/1.6.7/)
 
 License
 =======
 Spatial Data Manager는 [Apache License](http://en.wikipedia.org/wiki/Apache_License)를 따릅니다.
-하지만, 기반이 되는 Tadpole은 [LGPL](https://www.gnu.org/licenses/lgpl.html)을 따르며, LeafletJS는 [자체 라이선스](http://leafletjs.com/)를 따릅니다.
+하지만, 기반이 되는 Tadpole DB Hub는 [LGPL](https://www.gnu.org/licenses/lgpl.html)을 따르며, LeafletJS는 [자체 라이선스](http://leafletjs.com/)를 따릅니다.
 
 

@@ -32,6 +32,9 @@ public class ConnectionViewerDecorator implements IConnectionDecoration {
 	
 	@Override
 	public Image getImage(UserDBDAO userDB) {
+		//
+		// 디비를 불러올때 공간 디비를 지원하는 것은 시스템 전반에 속도 저하를 가져와서 주석으로 막았습니다. - 현종(12.13.2015)
+		//
 //		if(userDB == null) return null;
 //		
 //		SpatiaDBFactory factory = new SpatiaDBFactory();
