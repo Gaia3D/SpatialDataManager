@@ -39,9 +39,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 /**
  * geo spatial utils
- * 
  * shape file merge : http://www.helptouser.com/gis/44874-merging-shapefiles-with-geotools.html
- * 
+ *  
  * @author hangum
  *
  */

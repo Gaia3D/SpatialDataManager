@@ -27,7 +27,6 @@ import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 /**
  * MSSQL spatial db test
  *
- *
  * @author hangum
  * @version 1.6.1
  * @since 2015. 5. 30.

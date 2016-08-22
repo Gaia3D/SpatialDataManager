@@ -373,7 +373,7 @@ public abstract class ShapeFileImportDialog extends Dialog {
 		ShapeImportDTO dto = new ShapeImportDTO();
 		dto.setTableName(textTableName.getText());
 		dto.setSrid(textSRID.getText());
-		dto.setCreate_statement(SQLUtil.sqlExecutable(textSQL.getText()));
+		dto.setCreate_statement(SQLUtil.removeCommentAndOthers(userDB, textSQL.getText()));
 		dto.setListShape(listShape);
 		
 		return dto;

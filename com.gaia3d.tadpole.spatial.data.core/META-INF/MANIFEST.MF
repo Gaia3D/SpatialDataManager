@@ -30,7 +30,8 @@ Bundle-ClassPath: .,
  libs/oracle/sdoutl-11.2.0.jar,
  libs/ziplib/log4j-over-slf4j-1.7.12.jar,
  libs/ziplib/slf4j-api-1.7.12.jar,
- libs/ziplib/zt-zip-1.8.jar
+ libs/ziplib/zt-zip-1.8.jar,
+ libs/oracle/ojdbc6.jar
 Export-Package: com.gaia3d.tadpole.spatial.data.core.spaitaldb,
  com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao,
  com.gaia3d.tadpole.spatial.data.core.spaitaldb.db

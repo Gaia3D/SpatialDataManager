@@ -144,7 +144,7 @@ public class SQLToShapeEditor extends EditorPart {
 	 * export shape 
 	 */
 	private void exportShape() {
-		final String strQuery =  SQLUtil.sqlExecutable(textSQL.getText());
+		final String strQuery =  SQLUtil.removeComment(textSQL.getText());
 		if("".equals(StringUtils.trimToEmpty(strQuery))) {
 			MessageDialog.openError(null, "Error", "Please input query.");
 			return;

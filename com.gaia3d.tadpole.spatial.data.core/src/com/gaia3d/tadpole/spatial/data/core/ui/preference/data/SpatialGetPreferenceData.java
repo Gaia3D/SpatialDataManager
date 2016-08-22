@@ -31,7 +31,7 @@ public class SpatialGetPreferenceData {
 
 	/** 지도를 그리기위해 데이터를 지도쪽에 데이터를 보내는 양. */
 	public static int getSendMapDataCount() {
-		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT);
+		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT, SpatialPreferenceDefine.SPATIAL_SEND_MAP_DATA_COUNT_VALUE);
 		if(userInfo == null) {
 			userInfo = new UserInfoDataDAO();
 			userInfo.setUser_seq(SessionManager.getUserSeq());
@@ -46,7 +46,7 @@ public class SpatialGetPreferenceData {
 	
 	/** 사용자가 지도를 클릭했을때 선택되는 색. */
 	public static String getUserOptions() {
-		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS);
+		UserInfoDataDAO userInfo = SessionManager.getUserInfo(SpatialPreferenceDefine.SPATIAL_USER_OPTIONS, SpatialPreferenceDefine.SPATIAL_USER_OPTIONS_VALUE);
 		if(userInfo == null) {
 			userInfo = new UserInfoDataDAO();
 			userInfo.setUser_seq(SessionManager.getUserSeq());
