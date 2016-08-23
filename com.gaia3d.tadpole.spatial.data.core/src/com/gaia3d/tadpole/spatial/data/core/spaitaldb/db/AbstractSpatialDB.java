@@ -26,12 +26,12 @@ import com.gaia3d.tadpole.spatial.data.core.spaitaldb.dao.RequestSpatialQueryDAO
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.utils.GEOJSONUtils;
 import com.gaia3d.tadpole.spatial.data.core.spaitaldb.utils.SDMUtiils;
 import com.gaia3d.tadpole.spatial.data.core.ui.editor.extension.SpatialDataManagerDataHandler;
+import com.gaia3d.tadpole.spatial.data.core.utils.GisResultSetUtils;
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine;
 import com.hangum.tadpole.engine.manager.TadpoleSQLManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.engine.sql.util.QueryUtils;
 import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
-import com.hangum.tadpole.engine.sql.util.resultset.ResultSetUtils;
 
 /**
  * abstract spatial db
@@ -100,7 +100,7 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(dao.getOrigianlQuery());
 			
-			Iterator<Map> iteMap = ResultSetUtils.getColumnTableColumnName(getUserDB(), rs.getMetaData()).values().iterator();
+			Iterator<Map> iteMap = GisResultSetUtils.getColumnTableColumnName(getUserDB(), rs.getMetaData()).values().iterator();
 			int intIndex = 0;
 			while(iteMap.hasNext()) {
 				Map mapOriginal = (Map)iteMap.next();

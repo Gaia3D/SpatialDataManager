@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="libs/oracle/ojdbc6.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdbc/oracle/ojdbc6.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdbc/oracle/sdoapi-11.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdbc/oracle/sdoutl-11.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ziplib/log4j-over-slf4j-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ziplib/slf4j-api-1.7.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ziplib/zt-zip-1.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/oracle/sdoapi-11.2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/oracle/sdoutl-11.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jts/jackson-annotations-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jts/jackson-core-2.4.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jts/jackson-databind-2.4.1.3.jar"/>
