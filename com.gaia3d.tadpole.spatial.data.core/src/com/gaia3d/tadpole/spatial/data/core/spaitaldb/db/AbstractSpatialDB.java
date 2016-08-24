@@ -112,9 +112,9 @@ public abstract class AbstractSpatialDB implements SpatialDB {
 				String strSearchType 	= (String)mapOriginal.get("type");
 				String strSearchTypeName = (String)mapOriginal.get("typeName");
 				
-//				if(logger.isDebugEnabled()) {
-//					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
-//				}
+				if(logger.isDebugEnabled()) {
+					logger.debug("==> [strSearchColumn]" + strSearchColumn + "\t [strSearchType]" + strSearchType + "\t[strSearchTypeName]" + strSearchTypeName);
+				}
 				
 				if(SDMUtiils.isSpitailColumn(userDB, strSearchType)) {
 					addCostumeColumn.add(strSearchColumn);

@@ -114,6 +114,8 @@ public abstract class SpatialDataManagerDataHandler extends AMainEditorExtension
 			super.setEnableExtension(true);
 		} else if(getEditorUserDB().getDBDefine() == DBDefine.ORACLE_DEFAULT) {
 			super.setEnableExtension(true);
+		} else if(getEditorUserDB().getDBDefine() == DBDefine.TIBERO_DEFAULT) {
+			super.setEnableExtension(true);
 		}
 	}
 	

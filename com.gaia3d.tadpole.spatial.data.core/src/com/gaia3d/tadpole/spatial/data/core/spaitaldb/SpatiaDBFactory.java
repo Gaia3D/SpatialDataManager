@@ -25,7 +25,7 @@ import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 public class SpatiaDBFactory {
 
 	/**
-	 * 
+	 * 테드폴에서 지원하는 공간 디비를 리턴합니다.
 	 */
 	public SpatialDB getSpatialDB(UserDBDAO userDB) {
 		if(userDB.getDBDefine() == null) return null;
@@ -36,6 +36,8 @@ public class SpatiaDBFactory {
 			return new MSSQLSpatialDB(userDB);
 		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT) {
 			return new OracleSQLSpatialDB(userDB);
+		} else if(userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT) {
+			return new TiberoSQLSpatialDB(userDB);
 		}
 		
 		return null;

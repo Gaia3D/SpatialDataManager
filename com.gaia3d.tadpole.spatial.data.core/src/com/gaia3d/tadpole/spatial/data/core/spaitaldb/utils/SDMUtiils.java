@@ -25,6 +25,8 @@ public class SDMUtiils {
 			return true;
 		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT & strSearchType.equals("2002")) {
 			return true;
+		} else if(userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT & strSearchType.equals("26")) {
+			return true;
 		}
 		
 		return false;

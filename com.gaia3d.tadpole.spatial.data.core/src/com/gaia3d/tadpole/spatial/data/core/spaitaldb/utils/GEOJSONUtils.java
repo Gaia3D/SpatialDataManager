@@ -66,7 +66,7 @@ public class GEOJSONUtils {
 		String geoFeature = "";
 		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
 			geoFeature = String.format(GEOJSON_FEATURE, ((String)obj) + properties);
-		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT) {
+		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT || userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT) {
 			try {
 				geoFeature = String.format(GEOJSON_FEATURE, SpatialUtils.wktToGeojson((String)obj) + properties);
 			} catch (ParseException e) {
@@ -79,6 +79,12 @@ public class GEOJSONUtils {
 			} catch (Exception e) {
 				logger.error("WKT parse exception", e);
 			}
+		}
+		
+		try {
+			geoFeature = String.format(GEOJSON_FEATURE, SpatialUtils.wktToGeojson((String)obj) + properties);
+		} catch (ParseException e) {
+			logger.error("WKT parse exception", e);
 		}
 		
 		return geoFeature;
