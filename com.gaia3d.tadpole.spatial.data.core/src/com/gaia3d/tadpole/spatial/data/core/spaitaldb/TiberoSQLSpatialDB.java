@@ -37,9 +37,9 @@ public class TiberoSQLSpatialDB extends AbstractSpatialDB {
 	private static final Logger logger = Logger.getLogger(TiberoSQLSpatialDB.class);
 	
 	/**
-	 *	https://technet.tmaxsoft.com/upload/download/online/tibero/pver-20150504-000001/index.html
+	 *	https://technet.tmaxsoft.com/upload/download/online/tibero/pver-20150504-000001/tibero_spatial/ch_03.html
 	 */
-	protected static final String ORACLE_GEOJSON_COLUMN_SQL = "ST_ASTEXT(TADPOLESUB.%s) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
+	protected static final String TIBERO_GEOJSON_COLUMN_SQL = "ST_ASTEXT(TADPOLESUB.%s) as " + PublicTadpoleDefine.SPECIAL_USER_DEFINE_HIDE_COLUMN + "%s";
 	
 	/** 
 	 * @param userDB
@@ -103,7 +103,7 @@ public class TiberoSQLSpatialDB extends AbstractSpatialDB {
 	 */
 	@Override
 	public RequestSpatialQueryDAO makeSpatialQuery(RequestSpatialQueryDAO dao) {
-		dao.setSpatialQuery(ORACLE_GEOJSON_COLUMN_SQL);
+		dao.setSpatialQuery(TIBERO_GEOJSON_COLUMN_SQL);
 		try {
 			return sqlCostume(dao);
 		} catch (Exception e) {

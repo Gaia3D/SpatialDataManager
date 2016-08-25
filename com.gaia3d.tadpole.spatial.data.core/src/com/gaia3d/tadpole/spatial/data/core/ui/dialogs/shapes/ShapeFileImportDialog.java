@@ -116,7 +116,7 @@ public abstract class ShapeFileImportDialog extends Dialog {
 		
 		Label lblFileName = new Label(compositeHead, SWT.NONE);
 		lblFileName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblFileName.setText("File name");
+		lblFileName.setText("File name(*.zip)");
 		
 		fileNameLabel = new Text(compositeHead, SWT.BORDER);
 		fileNameLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));

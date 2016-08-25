@@ -29,6 +29,7 @@ import com.gaia3d.tadpole.spatial.data.core.spaitaldb.db.SpatialDB;
 import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.MssqlShapeFileImportDialog;
 import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.OracleShapeFileImportDialog;
 import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.PgsqlShapeFileImportDialog;
+import com.gaia3d.tadpole.spatial.data.core.ui.dialogs.shapes.TiberoShapeFileImportDialog;
 import com.hangum.tadpole.engine.define.DBDefine;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 
@@ -65,6 +66,9 @@ public class ImportShapeFileActions implements IViewActionDelegate {
 			dialog.open();
 		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT) {
 			OracleShapeFileImportDialog dialog = new OracleShapeFileImportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), userDB);
+			dialog.open();
+		} else if(userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT) {
+			TiberoShapeFileImportDialog dialog = new TiberoShapeFileImportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), userDB);
 			dialog.open();
 		}
 	}
