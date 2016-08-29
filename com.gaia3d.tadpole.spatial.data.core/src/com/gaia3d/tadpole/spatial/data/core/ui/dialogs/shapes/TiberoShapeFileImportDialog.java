@@ -32,7 +32,30 @@ import com.ibatis.sqlmap.client.SqlMapClient;
 /**
  * tibero shape file import
  * 
+ * https://technet.tmaxsoft.com/upload/download/online/tibero/pver-20150504-000001/tibero_spatial/ch_02.html
  * https://technet.tmaxsoft.com/upload/download/online/tibero/pver-20150504-000001/tibero_spatial/ch_03.html
+ * http://hangumkj.blogspot.kr/2016/08/tibero-sdm.html
+ * 
+ * 임포트 후에 다음의 작업을 해주어야 합니다.
+ *
+<pre>
+ 위의 데이터를 임포트하고 다음의 작업을 해줘야합니다.
+-- 1) 공간 인덱스 생성하기
+CREATE INDEX RT_IDX_KODIS_BAS ON TL_KODIS_BAS_2015_03__4326(THE_GEOM) RTREE;
+
+-- 2) 프라이머리 키 생성하기
+ALTER TABLE TL_KODIS_BAS_2015_03
+ADD CONSTRAINT TL_KODIS_BAS_2015_03_PK  PRIMARY KEY (ID) ;
+
+-- 3) 공간컬럼 등록하기
+call SYSGIS.REGISTER_SPATIAL_REF_SYS(4326,'hangum',4326,'test');
+
+CALL SYSGIS.REGISTER_GEOMETRY_COLUMNS(
+'SYSGIS.TL_KODIS_BAS_2015_03'
+,'THE_GEOM'
+, 102
+, 101);
+</pre>
  * 
  * @author hangum
  *
@@ -41,22 +64,18 @@ public class TiberoShapeFileImportDialog extends ShapeFileImportDialog {
 	private static final Logger logger = Logger.getLogger(TiberoShapeFileImportDialog.class);
 	
 	/** crate table statement head */
-	public static String CREATE_TABLE_HEAD = 
-			" CREATE TABLE %s(			\n" +  
-			"	sdm_gid int NOT NULL IDENTITY(1,1) PRIMARY KEY			\n";
+	public static String CREATE_TABLE_HEAD 	= " CREATE TABLE %s(			\n" +  
+			"	sdm_gid NUMBER \n";
 		
-	public static String CREATE_TABLE_GEO = 
-		"	,%s geometry \n";
+	public static String CREATE_TABLE_GEO = "	,%s GEOMETRY \n";
 	
-	public static String CREATE_TABLE_NORMAL =
-		"	,%s text		\n";
+	public static String CREATE_TABLE_NORMAL = "	,%s VARCHAR(4000)		\n";
 					
-	public static String CREATE_TABLE_KEY =
-		");";
+	public static String CREATE_TABLE_KEY = ");";
 		
 	/** define insert into statement */
 	public static String INSERT_STATEMENT = "INSERT INTO %s(%s)\n VALUES(%s);\n";
-	public static String INSERT_VALUE_GEOM = ",geometry::STGeomFromText('%s', %s)";
+	public static String INSERT_VALUE_GEOM = ",ST_GEOMFROMTEXT('%s')";
 	public static String INSERT_VALUE_NONE = ",'%s'";
 	
 	public TiberoShapeFileImportDialog(Shell parentShell, UserDBDAO userDB) {
@@ -95,7 +114,7 @@ public class TiberoShapeFileImportDialog extends ShapeFileImportDialog {
 					
 					String strTmpValue = StringEscapeUtils.escapeSql(obj==null?"":obj.toString());
 					if(obj != null && StringUtils.startsWith(obj.getClass().getName(), "com.vividsolutions.jts.geom")) {
-						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue, shapeDto.getSrid());
+						strTmpValue = String.format(INSERT_VALUE_GEOM, strTmpValue);
 					} else {
 						strTmpValue = String.format(INSERT_VALUE_NONE, strTmpValue);
 						if(!"".equals(strCharSet)) strTmpValue = new String(strTmpValue.getBytes("8859_1"), strCharSet);//"euc-kr");

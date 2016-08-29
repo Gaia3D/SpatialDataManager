@@ -105,6 +105,7 @@ public class GEOJSONUtils {
 									final List<Map<Integer, Object>> resultData, 
 									boolean isProperties) {
 		final List<String> listGisColumnGjson = new ArrayList<>();
+		if(rsDAO == null) return "";
 		final Map<Integer, String> mapColumnName = rsDAO.getColumnName();
 		
 		
