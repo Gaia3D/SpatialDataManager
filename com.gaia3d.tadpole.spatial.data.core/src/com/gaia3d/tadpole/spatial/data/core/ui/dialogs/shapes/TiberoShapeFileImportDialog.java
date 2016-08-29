@@ -36,8 +36,8 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  * https://technet.tmaxsoft.com/upload/download/online/tibero/pver-20150504-000001/tibero_spatial/ch_03.html
  * http://hangumkj.blogspot.kr/2016/08/tibero-sdm.html
  * 
- * 임포트 후에 다음의 작업을 해주어야 합니다.
- *
+ * 임포트 후에 다음의 작업을 해주어야 합니다. (꼭 읽어볼것 http://hangumkj.blogspot.kr/2016/08/tibero-sdm.html)
+ * 
 <pre>
  위의 데이터를 임포트하고 다음의 작업을 해줘야합니다.
 -- 1) 공간 인덱스 생성하기
