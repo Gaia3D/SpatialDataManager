@@ -256,7 +256,6 @@ public abstract class ShapeFileImportDialog extends Dialog {
 						logger.debug("\t source is " + userDBFile.getAbsolutePath());
 						logger.debug("\t target is " + strExtractionDir);
 					}
-
 					
 					getShell().getDisplay().asyncExec(new Runnable() {
 						@Override

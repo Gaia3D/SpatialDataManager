@@ -66,7 +66,7 @@ public class GEOJSONUtils {
 		String geoFeature = "";
 		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
 			geoFeature = String.format(GEOJSON_FEATURE, ((String)obj) + properties);
-		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT || userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT) {
+		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT || userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT || userDB.getDBDefine() == DBDefine.ALTIBASE_DEFAULT) {
 			try {
 				geoFeature = String.format(GEOJSON_FEATURE, SpatialUtils.wktToGeojson((String)obj) + properties);
 			} catch (ParseException e) {
@@ -132,10 +132,11 @@ public class GEOJSONUtils {
 					
 					strProperties = String.format(GEOJSON_FEATURE_PROPERTIES, StringUtils.removeEnd(strBfProp.toString(), ","));
 				}
-				
-				String geoFeature = _partMakrFeature(userDB, mapResult.get(index), strProperties);
-				
-				listGisColumnGjson.add(geoFeature);
+				if(mapResult.get(index) != null) {
+					String geoFeature = _partMakrFeature(userDB, mapResult.get(index), strProperties);
+					
+					listGisColumnGjson.add(geoFeature);
+				}
 			}
 		}
 		

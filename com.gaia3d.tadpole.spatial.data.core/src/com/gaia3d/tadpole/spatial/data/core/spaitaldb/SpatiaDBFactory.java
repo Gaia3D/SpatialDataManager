@@ -38,6 +38,8 @@ public class SpatiaDBFactory {
 			return new OracleSQLSpatialDB(userDB);
 		} else if(userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT) {
 			return new TiberoSQLSpatialDB(userDB);
+		} else if(userDB.getDBDefine() == DBDefine.ALTIBASE_DEFAULT) {
+			return new AltibaseSQLSpatialDB(userDB);
 		}
 		
 		return null;
