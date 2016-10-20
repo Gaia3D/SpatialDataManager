@@ -67,10 +67,11 @@ public class GEOJSONUtils {
 		if(userDB.getDBDefine() == DBDefine.POSTGRE_DEFAULT) {
 			geoFeature = String.format(GEOJSON_FEATURE, ((String)obj) + properties);
 		} else if(userDB.getDBDefine() == DBDefine.MSSQL_DEFAULT || userDB.getDBDefine() == DBDefine.TIBERO_DEFAULT || userDB.getDBDefine() == DBDefine.ALTIBASE_DEFAULT) {
+			String strWTK = (String)obj;
 			try {
-				geoFeature = String.format(GEOJSON_FEATURE, SpatialUtils.wktToGeojson((String)obj) + properties);
+				geoFeature = String.format(GEOJSON_FEATURE, SpatialUtils.wktToGeojson(strWTK) + properties);
 			} catch (ParseException e) {
-				logger.error("WKT parse exception", e);
+				logger.error("WKT parse exception [wkt]" + strWTK, e);
 			}
 		} else if(userDB.getDBDefine() == DBDefine.ORACLE_DEFAULT) {
 			try {
