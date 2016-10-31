@@ -59,6 +59,8 @@
       <plugin id="com.hangum.tadpole.help.core"/>
       <plugin id="com.hangum.tadpole.hive.core"/>
       <plugin id="com.hangum.tadpole.importexport.db"/>
+      <plugin id="com.hangum.tadpole.login.basic.core"/>
+      <plugin id="com.hangum.tadpole.login.core"/>
       <plugin id="com.hangum.tadpole.manager.core"/>
       <plugin id="com.hangum.tadpole.mongodb.core"/>
       <plugin id="com.hangum.tadpole.mongodb.core.ext"/>
